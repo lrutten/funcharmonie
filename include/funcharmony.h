@@ -285,6 +285,7 @@ public:
    void  set_toonaard(Toonaard *tb);
    Noot *get_stem(int i);
    void  set_stem(int i, Noot *nt);
+   void print();
 };
 
 class Maat
@@ -306,6 +307,7 @@ public:
    {
       return tellen[i];
    }
+   void print();
 };
 
 class Lied
@@ -319,11 +321,12 @@ public:
    Lied(Harmonie *hrm, const std::string fn);
    unsigned long tellen_size();
    Tel *get_tel(unsigned long i);
+   void nieuwe_maat();
 
    void parse_test_v1();
    void parse();
-   void parse_linetype(const std::string ltype);
-   void parse_v1(const std::string line);
+   void parse_linetype(const std::string ltype, bool maak_noot);
+   void parse_v1(const std::string line, bool maak_noot);
    void parse_fu(const std::string line);
    void parse_ke(const std::string line);
    int s_to_octaaf(std::string s);

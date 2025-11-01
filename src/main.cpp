@@ -8,8 +8,6 @@
 #include "mainwindow.h"  // NOLINT(build/include_subdir) INCLUDE_NO_DIR
 
 
-
-
 class Main
 {
 private:
@@ -39,7 +37,8 @@ void Main::open()
    try
    {
       lied->parse();
-      lied->to_ly();
+      lied->print();
+      lied->to_ly_template();
    }
    catch(ParserError fout)
    {
@@ -55,7 +54,7 @@ void Main::print()
 int main(int argc, char** argv)
 {
    Main *mn = new Main();
-   mn->print();
+   //mn->print();
    mn->open();
 
    delete mn;

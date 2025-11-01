@@ -6,7 +6,9 @@
 #include <set>
 #include <algorithm>
 #include <regex>
+#include <cassert>
 
+#include "inja.hpp"
 #include "funcharmony.h"
 
 
@@ -682,6 +684,15 @@ Noot::Noot(Trap *trp, int oct, int len) : trap(trp), octaaf(oct), lengte(len)
 
 std::string Noot::to_s()
 {
+   std::cout << "   to_s\n";
+   if (get_trap() != nullptr)
+   {
+      std::cout << "      trap " << get_trap()->get_naam() << "\n";
+   }
+   else
+   {
+      std::cout << "      trap nullptr\n";
+   }
    std::string nootnm = get_trap()->get_noot()->get_naam();
    int oct = get_octaaf();
    if (oct > 0)
@@ -748,10 +759,35 @@ void Tel::set_stem(int i, Noot *nt)
    stemmen[i] = nt;
 }
 
+void Tel::print()
+{
+   Noot *noot = stemmen[0]; // v1
+   int len = noot->get_lengte();
+   /*
+   std::string naam = noot->get_trap()->get_noot()->get_naam();
+   std::cout << "      Tel v1 " << naam << len << "\n";
+    */
+   std::cout << "      Tel v1 " << (noot != nullptr) << " len " << len << "\n";
+   std::cout << "         trap " << (noot->get_trap() != nullptr) << "\n";
+   std::cout << "         trap noot " << (noot->get_trap()->get_noot() != nullptr) << "\n";
+
+   std::string naam = noot->get_trap()->get_noot()->get_naam();
+   std::cout << "         naam " << naam << len << "\n";
+}
+
 // ----------  Maat ----------
 
 Maat::Maat()
 {
+}
+
+void Maat::print()
+{
+   std::cout << "   Maat\n";
+   for (Tel *tel: tellen)
+   {
+      tel->print();
+   }
 }
 
 // ----------  Lied ----------
@@ -772,6 +808,11 @@ unsigned long Lied::tellen_size()
    return sz;
 }
 
+void Lied::nieuwe_maat()
+{
+   maten.push_back(new Maat());
+}
+
 Tel *Lied::get_tel(unsigned long n)
 {
    if (n >= tellen_size())
@@ -781,7 +822,7 @@ Tel *Lied::get_tel(unsigned long n)
          maten.push_back(new Maat());
       }
       Maat *laatste_maat = maten[maten.size()-1];
-
+      assert(laatste_maat != nullptr);
       Tel *tel = new Tel();
       laatste_maat->add(tel);
       return tel;
@@ -979,26 +1020,33 @@ void Lied::parse_test_v1()
    }
 }
 
-void Lied::parse_v1(const std::string line)
+/**
+ * maak_noot: false, pas 1, maak geen noten maar wel de tellen en maten
+ * maak_noot: true,  pas 2, maak  noten in de bestaande tellen en maten
+ */ 
+void Lied::parse_v1(const std::string line, bool maak_noot)
 {
-   std::cout << "   parse v1\n";
+   std::cout << "\n------- parse v1 ----------\n";
    
-   // Haal de eerste toonaard
    Toonaard * huidige_tna = nullptr;
-   if (tellen_size() > 0)
+   if (maak_noot)
    {
-      Tel *tel0 = get_tel(0);
-      huidige_tna = tel0->get_toonaard();
-      if (huidige_tna == nullptr)
+      // Haal de eerste toonaard
+      if (tellen_size() > 0)
+      {
+         Tel *tel0 = get_tel(0);
+         huidige_tna = tel0->get_toonaard();
+         if (huidige_tna == nullptr)
+         {
+            throw ParserError("De eerste toonaard ontbreekt");
+         }
+      }
+      else
       {
          throw ParserError("De eerste toonaard ontbreekt");
       }
+      std::cout << "start toonaard " << huidige_tna->get_naam() << "\n";
    }
-   else
-   {
-      throw ParserError("De eerste toonaard ontbreekt");
-   }
-   std::cout << "start toonaard " << huidige_tna->get_naam() << "\n";
 
    // patroon voor één noot zoals: gis'4, zonder maatstreep
    //const std::regex   notes(R"((?:^|\s+)([a-z]+)((?:\'{0,3}|\,{0,2}))((?:1|2|4|8)))");
@@ -1023,6 +1071,7 @@ void Lied::parse_v1(const std::string line)
    {
       std::cout << "Match size " << (*it).size() << "\n";
 
+      // test
       int j = 0;
       for (auto s: *it)
       {
@@ -1058,33 +1107,45 @@ void Lied::parse_v1(const std::string line)
                
       std::cout << "i: " << i << " letters " <<  letters << " acckomma " << acckomma <<  " cijfer "  << cijfer  << "\n";
 
-      // Is er op deze tel een nieuwe toonaard?
-      if (i > 0 && i < tellen_size())
+      if (maak_noot)
       {
-         //ok, deze tel bestaat al
-         Tel *tl = get_tel(i);
-         // heeft deze tel een toonaard?
-         Toonaard *tna = tl->get_toonaard();
-         if (tna != nullptr)
+         // Is er op deze tel een nieuwe toonaard?
+         if (i > 0 && i < tellen_size())
          {
-            // wissel van toonaard
-            std::cout << "wissel toonaard " << tna->get_naam() << "\n";
-            huidige_tna = tna;
+            //ok, deze tel bestaat al
+            Tel *tl = get_tel(i);
+            // heeft deze tel een toonaard?
+            Toonaard *tna = tl->get_toonaard();
+            if (tna != nullptr)
+            {
+               // wissel van toonaard
+               std::cout << "wissel toonaard " << tna->get_naam() << "\n";
+               huidige_tna = tna;
+            }
          }
-      }
+
       
-      std::cout << "zoek noot in toonaard " << huidige_tna->get_naam() << "\n";
-      Trap * trap = huidige_tna->zoek_noot(letters);
-      if (trap == nullptr)
+         std::cout << "zoek noot in toonaard " << huidige_tna->get_naam() << "\n";
+         Trap * trap = huidige_tna->zoek_noot(letters);
+         if (trap == nullptr)
+         {
+            throw ParserError("Noot niet in toonladder");
+         }
+         std::cout << "noot trap gevonden\n";
+      
+
+         Noot *noot = new Noot(trap, s_to_octaaf(acckomma), s_to_lengte(cijfer));
+         Tel  *tl = get_tel(i);
+         tl->set_stem(0, noot);
+      }
+      else
       {
-         throw ParserError("Noot niet in toonladder");
+         if (pipetussen)
+         {
+            nieuwe_maat();
+         }
+         Tel  *tl = get_tel(i);
       }
-      std::cout << "noot trap gevonden\n";
-      
-      Noot *noot = new Noot(trap, s_to_octaaf(acckomma), s_to_lengte(cijfer));
-      Tel  *tl = get_tel(i);
-      tl->set_stem(0, noot);
-      
       i++;
       it++;
    }
@@ -1092,7 +1153,7 @@ void Lied::parse_v1(const std::string line)
 
 void Lied::parse_fu(const std::string line)
 {
-   std::cout << "   parse fu\n";
+   std::cout << "\n------- parse fu ----------\n";
    
    // Haal de eerste toonaard
    Toonaard * huidige_tna = nullptr;
@@ -1166,7 +1227,7 @@ void Lied::parse_fu(const std::string line)
 
 void Lied::parse_ke(const std::string line)
 {
-   std::cout << "   parse ke\n";
+   std::cout << "\n------- parse ke ----------\n";
    // patroon voor één noot zoals: gis'4
    //const std::regex toonaard(R"(([a-zA-Z]+)(?:\s+))");
    const std::regex toonaard(R"((?:^|\s+)((?:[a-zA-Z]+)|-))");
@@ -1212,7 +1273,7 @@ void Lied::parse_ke(const std::string line)
    }
 }
 
-void Lied::parse_linetype(const std::string ltype)
+void Lied::parse_linetype(const std::string ltype, bool maak_noot)
 {
    std::cout << "\n";
    for (int i=0; i<file->size(); i++)
@@ -1236,7 +1297,7 @@ void Lied::parse_linetype(const std::string ltype)
          {
             if (type == "v1")
             {
-               parse_v1(rest);
+               parse_v1(rest, maak_noot);
             }
             else
             if (type == "fu")
@@ -1255,22 +1316,28 @@ void Lied::parse_linetype(const std::string ltype)
 
 void Lied::parse()
 {
-   parse_linetype("ke");
-   parse_linetype("v1");
-   parse_linetype("fu");
+   parse_linetype("v1", false);
+   parse_linetype("ke", false);
+   parse_linetype("v1", true);
+   parse_linetype("fu", false);
 }
 
 void Lied::print()
 {
+   std::cout << "++++ Lied ++++\n";
+   for (Maat *mt: maten)
+   {
+      mt->print();
+   }
 }
 
 void Lied::to_ly_voice(std::ofstream &lyf, int i)
 {
    //lyf << "c''4 d''4 e''4 f''4";
    lyf << "   ";
-   for (unsigned int i = 0; i<tellen_size(); i++)
+   for (unsigned int j = 0; j<tellen_size(); j++)
    {
-      Tel *tel = get_tel(i);
+      Tel *tel = get_tel(j);
       Noot *noot = tel->get_stem(i);
       if (noot != nullptr)
       {
@@ -1280,6 +1347,7 @@ void Lied::to_ly_voice(std::ofstream &lyf, int i)
    lyf << "\n";
 }
 
+/*
 void Lied::to_ly()
 {
     std::ofstream lyf;
@@ -1321,8 +1389,10 @@ VoiceOne =
    \clef "treble"
    \global
 )EOF";
-   
-   to_ly_voice(lyf, 0);
+   nlohmann::json data;
+   data["v1"] = "g''4 a''4 g''4 e''4";
+   inja::render_to(lyf, "{{ v1 }}", data );
+   //to_ly_voice(lyf, 0);
 
    lyf <<
 R"EOF(}
@@ -1404,4 +1474,16 @@ analysis = \lyricmode
     
     lyf.close();
 }
+ */
 
+void Lied::to_ly()
+{
+   inja::Environment env;
+
+   nlohmann::json data;
+   data["name"] = "world";
+
+   // Or directly read a template file
+   inja::Template temp = env.parse_template("./templates/muziek.tly");
+   env.write(temp, data, "./muziek.ly");
+}

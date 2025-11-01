@@ -12,6 +12,8 @@ file(GLOB_RECURSE sources
 add_library(CxxMidi INTERFACE)
 add_library(CxxMidi::CxxMidi ALIAS CxxMidi)
 
+#find_package(lsp1.2.0 EXACT REQUIRED)
+#add_library(funcharmonie PUBLIC lsp::lsp ALIAS lsp)
 
 target_include_directories(CxxMidi
   INTERFACE
@@ -51,7 +53,8 @@ endif()
 target_link_libraries(funcharmonie
   CxxMidi::CxxMidi
   Threads::Threads
-  Qt6::Widgets)
+  Qt6::Widgets
+  lsp)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   target_link_libraries(funcharmonie ${ALSA_LIBRARIES})
