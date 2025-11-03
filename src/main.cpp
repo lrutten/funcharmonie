@@ -38,7 +38,7 @@ void Main::open()
    {
       lied->parse();
       lied->print();
-      //lied->to_ly_template();
+      lied->to_ly();
    }
    catch(ParserError fout)
    {

@@ -657,6 +657,8 @@ void Toonaard::maak_trappen(Toetsen *tt)
       NootNaam *nn7 = wzr->get(richting);
       if (debug) std::cout << "      noot 7 " << nn7->get_naam() << "\n";
       toonladder->add_trap(new Trap("VII", 6, this, nn7));
+      
+      delete wzr;
    }
    toonladder->maak_akkoorden();
 }
