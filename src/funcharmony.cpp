@@ -43,6 +43,11 @@ NootNaam::NootNaam(const std::string &nm, int mnr) : naam(nm), midi(mnr)
 {
 }
 
+NootNaam::~NootNaam()
+{
+   std::cout << "~NootNaam\n";
+}
+
 std::string NootNaam::get_naam()
 {
    return naam;
@@ -59,8 +64,17 @@ void NootNaam::print()
 }
 
 
+// ---------- NootNamen ----------
+
 NootNamen::NootNamen()
 {
+}
+
+// ---------- Toets ----------
+
+Toets::~Toets()
+{
+   std::cout << "~Toets\n";
 }
 
 
@@ -68,6 +82,12 @@ NootNamen::NootNamen()
 
 Wit::Wit(NootNaam *nn) : nootnaam(nn)
 {
+}
+
+Wit::~Wit()
+{
+   std::cout << "~Wit\n";
+   delete nootnaam;
 }
 
 bool Wit::heeft_naam(std::string nm)
@@ -91,6 +111,13 @@ void Wit::print()
 
 Zwart::Zwart(NootNaam *nn_lg, NootNaam *nn_hg) : nootnaam_laag(nn_lg), nootnaam_hoog(nn_hg)
 {
+}
+
+Zwart::~Zwart()
+{
+   std::cout << "~Zwart\n";
+   delete nootnaam_laag;
+   delete nootnaam_hoog;
 }
 
 NootNaam *Zwart::laag()
@@ -146,6 +173,11 @@ ToetsWijzer::ToetsWijzer(Toetsen  *tt, int i) : toetsen(tt), index(i)
 {
 }
 
+ToetsWijzer::~ToetsWijzer()
+{
+   std::cout << "~ToetsWijzer\n";
+}
+
 NootNaam *ToetsWijzer::get(int ri)
 {
    Toets *t = toetsen->get(index);
@@ -185,6 +217,15 @@ Toetsen::Toetsen()
    toetsen.push_back(new Wit(new NootNaam("b", 59)));
 }
 
+Toetsen::~Toetsen()
+{
+   std::cout << "~Toetsen\n";
+   for (Toets *t: toetsen)
+   {
+      delete t;
+   }
+}
+
 Toets *Toetsen::get(int i)
 {
    return toetsen[i];
@@ -221,6 +262,11 @@ AkkoordNoot::AkkoordNoot(NootNaam *nt, int rl, int st) : noot(nt), rol(rl), stap
 {
 }
 
+AkkoordNoot::~AkkoordNoot()
+{
+   std::cout << "~AkkoordNoot\n";
+}
+
 void AkkoordNoot::set_akkoord(Akkoord *akk)
 {
    akkoord = akk;
@@ -241,6 +287,14 @@ int AkkoordNoot::get_stap() const
 
 Akkoord::Akkoord(Trap *tr, AkkoordNoot *gg, AkkoordNoot *tt, AkkoordNoot *kk, int omk) : trap(tr), g(gg), t(tt), omkering(omk), k(kk)
 {
+}
+
+Akkoord::~Akkoord()
+{
+   std::cout << "~Akkoord\n";
+   delete g;
+   delete t;
+   delete k;
 }
 
 int Akkoord::get_basisnoot_rang() const
@@ -310,7 +364,17 @@ void Akkoord::print()
 Trap::Trap(std::string nm, int stp, Toonaard *tona, NootNaam *nt) : noot(nt), naam(nm), stap(stp), toonaard(tona) 
 {
 }
-   
+
+Trap::~Trap()
+{
+   std::cout << "~Trap\n";
+
+   for (Akkoord *akk: akkoorden)
+   {
+      delete akk;
+   }
+}
+
 int Trap::get_stap()
 {
    return stap;
@@ -405,6 +469,16 @@ void Trap::print()
 
 Toonladder::Toonladder()
 {
+}
+
+Toonladder::~Toonladder()
+{
+   std::cout << "~Toonladder\n";
+   
+   for (Trap *tr: trappen)
+   {
+      delete tr;
+   }
 }
 
 Trap *Toonladder::get(int i)
@@ -510,6 +584,12 @@ void Toonladder::print()
 Toonaard::Toonaard(std::string nm, int ri) : naam(nm), richting(ri)
 {
    toonladder = new Toonladder();
+}
+
+Toonaard::~Toonaard()
+{
+   std::cout << "~Toonaard\n";
+   delete toonladder;
 }
 
 std::string Toonaard::get_naam()
@@ -625,6 +705,15 @@ Toonaarden::Toonaarden()
    toonaarden.push_back(new Toonaard("Ges", -1)); // Fis
 }
 
+Toonaarden::~Toonaarden()
+{
+   std::cout << "~Toonaarden\n";
+   for (Toonaard *to: toonaarden)
+   {
+      delete to;
+   }
+}
+
 void Toonaarden::maak_trappen(Toetsen *tt)
 {
    for (Toonaard *to: toonaarden)
@@ -663,6 +752,9 @@ Harmonie::Harmonie() : toetsen(new Toetsen()), toonaarden(new Toonaarden())
 
 Harmonie::~Harmonie()
 {
+   std::cout << "~Harmonie\n";
+   delete toetsen;
+   delete toonaarden;
 }
 
 Toonaard *Harmonie::zoek_toonaard(const std::string letters)
@@ -680,6 +772,11 @@ void Harmonie::print()
 
 Noot::Noot(Trap *trp, int oct, int len) : trap(trp), octaaf(oct), lengte(len)
 {
+}
+
+Noot::~Noot()
+{
+   std::cout << "~Noot\n";
 }
 
 std::string Noot::to_s()
@@ -729,6 +826,17 @@ std::string Noot::to_s()
    return nootnm;
 }
 
+// ----------  Functie ----------
+
+Functie::Functie()
+{
+}
+
+Functie::~Functie()
+{
+   std::cout << "~Functie\n";
+}
+
 // ----------  Tel ----------
 
 Tel::Tel() : lengte(0), functie(nullptr), toonaard(nullptr)
@@ -737,6 +845,17 @@ Tel::Tel() : lengte(0), functie(nullptr), toonaard(nullptr)
    stemmen[1] = nullptr;
    stemmen[2] = nullptr;
    stemmen[3] = nullptr;
+}
+
+Tel::~Tel()
+{
+   std::cout << "~Tel\n";
+   if (stemmen[0] != nullptr) delete stemmen[0];
+   if (stemmen[1] != nullptr) delete stemmen[1];
+   if (stemmen[2] != nullptr) delete stemmen[2];
+   if (stemmen[3] != nullptr) delete stemmen[3];
+   delete functie;
+   // delete toonaard; weak ptr
 }
 
 Toonaard *Tel::get_toonaard()
@@ -781,6 +900,15 @@ Maat::Maat()
 {
 }
 
+Maat::~Maat()
+{
+   std::cout << "~Maat\n";
+   for (Tel *tel: tellen)
+   {
+      delete tel;
+   }
+}
+
 void Maat::print()
 {
    std::cout << "   Maat\n";
@@ -794,6 +922,17 @@ void Maat::print()
 
 Lied::Lied(Harmonie *hrm, const std::string fn) : harmonie(hrm), file(new Textfile(fn))
 {
+}
+
+Lied::~Lied()
+{
+   std::cout << "~Lied\n";
+   //delete harmonie; // weak
+   delete file;
+   for (Maat *m: maten)
+   {
+      delete m;
+   }
 }
 
 unsigned long Lied::tellen_size()
@@ -1222,7 +1361,6 @@ void Lied::parse_fu(const std::string line)
       it++;
    }
 }
-
 
 
 void Lied::parse_ke(const std::string line)

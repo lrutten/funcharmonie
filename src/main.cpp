@@ -38,12 +38,14 @@ void Main::open()
    {
       lied->parse();
       lied->print();
-      lied->to_ly_template();
+      //lied->to_ly_template();
    }
    catch(ParserError fout)
    {
       std::cout << "Parser fout: " << fout.get_melding() << "\n";
    }
+
+   delete lied;
 }
 
 void Main::print()

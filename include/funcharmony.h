@@ -10,6 +10,8 @@
 constexpr int aantal_chrom_noten = 12;
 constexpr int aantal_diat_noten  = 7;
 
+// ---------- ParserError ----------
+
 class ParserError
 {
 private:
@@ -25,6 +27,8 @@ public:
    }
 };
 
+// ---------- NootNaam ----------
+
 class NootNaam
 {
 private:
@@ -33,10 +37,13 @@ private:
 
 public:
    NootNaam(const std::string &nm, int mnr);
+   ~NootNaam();
    std::string get_naam();
    int get_midi();
    void print();
 };
+
+// ---------- NootNamen ----------
 
 class NootNamen
 {
@@ -45,16 +52,21 @@ private:
 
 public:
    NootNamen();
+   ~NootNamen();
 };
 
+// ---------- Toets ----------
 
 class Toets
 {
 public:
+   virtual ~Toets() = 0;
    virtual void print() = 0;
    virtual bool heeft_naam(std::string nm) = 0;
    virtual NootNaam *get(int ri) = 0;
 };
+
+// ---------- Wit ----------
 
 class Wit : public Toets
 {
@@ -63,11 +75,13 @@ private:
 
 public:
    Wit(NootNaam *nn);
-
+   virtual ~Wit();
    virtual bool heeft_naam(std::string nm);
    virtual NootNaam *get(int ri);
    virtual void print();
 };
+
+// ---------- Zwart ----------
 
 class Zwart : public Toets
 {
@@ -77,14 +91,16 @@ private:
 
 public:
    Zwart(NootNaam *nn_lg, NootNaam *nn_hg);
+   virtual ~Zwart();
    NootNaam *laag();
    NootNaam *hoog();
 
    virtual bool heeft_naam(std::string nm);
    virtual NootNaam *get(int ri);
-
    virtual void print();
 };
+
+// ---------- ToetsWijzer ----------
 
 class Toetsen;
 
@@ -96,10 +112,12 @@ private:
 
 public:
    ToetsWijzer(Toetsen  *tt, int i);
+   ~ToetsWijzer();
    NootNaam *get(int ri);
    void inc();
 };
 
+// ---------- Toetsen ----------
 
 class Toetsen
 {
@@ -108,10 +126,13 @@ private:
 
 public:
    Toetsen();
+   ~Toetsen();
    Toets *get(int i);
    ToetsWijzer *zoek_noot(std::string nm);
    void print();
 };
+
+// ---------- AkkoordNoot ----------
 
 class Akkoord;
 
@@ -125,10 +146,13 @@ private:
 
 public:
    AkkoordNoot(NootNaam *nt, int rl, int st);
+   ~AkkoordNoot();
    void set_akkoord(Akkoord *akk);
    std::string get_naam();
    int get_stap() const;
 };
+
+// ---------- Akkoord ----------
 
 class Trap;
 
@@ -143,9 +167,12 @@ private:
 
 public:
    Akkoord(Trap *tr, AkkoordNoot *gg, AkkoordNoot *tt, AkkoordNoot *kk, int omk);
+   ~Akkoord();
    int get_basisnoot_rang() const;
    void print();
 };
+
+// ---------- Toonaard ----------
 
 
 class Toonaard;
@@ -161,6 +188,7 @@ private:
 
 public:
    Trap(std::string nm, int stp, Toonaard *tona, NootNaam *nt);
+   ~Trap();
    std::string get_naam();
    int get_stap();
    NootNaam *get_noot();
@@ -170,6 +198,8 @@ public:
    void print();
 };
 
+// ---------- Toonladder ----------
+
 
 class Toonladder
 {
@@ -178,6 +208,7 @@ private:
 
 public:
    Toonladder();
+   ~Toonladder();
    Trap *get(int i);
    void add_trap(Trap *tr);
    void maak_akkoorden();
@@ -187,6 +218,7 @@ public:
    void print();
 };
 
+// ---------- Toonaard ----------
 
 class Toonaard
 {
@@ -197,6 +229,7 @@ private:
 
 public:
    Toonaard(std::string nm, int ri);
+   ~Toonaard();
    std::string get_naam();
    NootNaam *get(int k);
    int inc(int j);
@@ -206,6 +239,7 @@ public:
    void print();
 };
 
+// ---------- Toonaarden ----------
 
 
 class Toonaarden
@@ -215,6 +249,7 @@ private:
 
 public:
    Toonaarden();
+   ~Toonaarden();
    void maak_trappen(Toetsen *tt);
    Toonaard *zoek(const std::string tna);
    void print();
@@ -238,16 +273,18 @@ public:
    void print();
 };
 
+// ----------  ----------
 
 class Noot
 {
 private:
-   Trap *trap;
+   Trap *trap; // weak ptr
    int   octaaf; // 1: ' 2: '' -1:,
    int   lengte; // 1, 2, 4 of 8
 
 public:
    Noot(Trap *trp, int oct, int len);
+   ~Noot();
    Trap *get_trap()
    {
       return trap;
@@ -263,13 +300,18 @@ public:
    std::string to_s();
 };
 
+// ---------- Functie ----------
+
 class Functie
 {
 private:
 
 public:
    Functie();   
+   ~Functie();   
 };
+
+// ---------- Tel ----------
 
 class Tel
 {
@@ -281,12 +323,15 @@ private:
 
 public:
    Tel();
+   ~Tel();
    Toonaard *get_toonaard();
    void  set_toonaard(Toonaard *tb);
    Noot *get_stem(int i);
    void  set_stem(int i, Noot *nt);
    void print();
 };
+
+// ---------- Maat ----------
 
 class Maat
 {
@@ -295,6 +340,7 @@ private:
    
 public:
    Maat();
+   ~Maat();
    unsigned long size()
    {
       return tellen.size();
@@ -309,6 +355,7 @@ public:
    }
    void print();
 };
+// ----------  ----------
 
 class Lied
 {
@@ -319,6 +366,7 @@ private:
    
 public:
    Lied(Harmonie *hrm, const std::string fn);
+   ~Lied();
    unsigned long tellen_size();
    Tel *get_tel(unsigned long i);
    void nieuwe_maat();
