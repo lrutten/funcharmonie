@@ -22,8 +22,18 @@ muziek.svg: muziek.ly build/funcharmonie
 	lilypond --svg -dresolution=600 -dcrop=#t muziek.ly
 	mv muziek.cropped.svg muziek.svg
 
+#muziek.png: muziek.ly build/funcharmonie
+#	lilypond --png -dresolution=600 -dcrop=#t muziek.ly
+#	mv muziek.cropped.png muziek.png
+
+muziek.png: muziek.svg
+	convert muziek.svg muziek.png
+
 toon: muziek.svg
 	gwenview muziek.svg
+
+toon-png: muziek.png
+	gwenview muziek.png
 
 clean-svg:
 	rm -vf *.svg

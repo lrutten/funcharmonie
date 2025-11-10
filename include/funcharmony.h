@@ -4,7 +4,9 @@
 #include <iostream>
 #include <vector>
 #include <array>
+#include <functional>
 
+#include "inja.hpp"
 #include "textfile.h"
 
 constexpr int aantal_chrom_noten = 12;
@@ -33,7 +35,7 @@ class NootNaam
 {
 private:
    std::string naam;
-   int         midi; // midi nummer
+   int         midi; // midi nummer binnen het niet-gestreepte octaaf
 
 public:
    NootNaam(const std::string &nm, int mnr);
@@ -63,7 +65,8 @@ public:
    virtual ~Toets() = 0;
    virtual void print() = 0;
    virtual bool heeft_naam(std::string nm) = 0;
-   virtual NootNaam *get(int ri) = 0;
+   virtual NootNaam *get(int ri) = 0;            // geef NootNaam terug met juiste richting
+   virtual NootNaam *get_nn(std::string nm) = 0; // geef NootNaam terug op naam
 };
 
 // ---------- Wit ----------
@@ -78,6 +81,7 @@ public:
    virtual ~Wit();
    virtual bool heeft_naam(std::string nm);
    virtual NootNaam *get(int ri);
+   virtual NootNaam *get_nn(std::string nm);
    virtual void print();
 };
 
@@ -97,6 +101,7 @@ public:
 
    virtual bool heeft_naam(std::string nm);
    virtual NootNaam *get(int ri);
+   virtual NootNaam *get_nn(std::string nm);
    virtual void print();
 };
 
@@ -128,8 +133,39 @@ public:
    Toetsen();
    ~Toetsen();
    Toets *get(int i);
-   ToetsWijzer *zoek_noot(std::string nm);
+   ToetsWijzer *zoek_noot_tw(std::string nm);
+   NootNaam *zoek_noot(std::string nm);
    void print();
+};
+
+// ---------- StemBereik ----------
+
+class Noot;
+
+class StemBereik
+{
+private:
+   Noot *laag;
+   Noot *hoog;
+   
+public:
+   StemBereik(Noot *lg, Noot *hg);
+   ~StemBereik();
+};
+
+// ---------- StemBereiken ----------
+
+class Harmonie;
+
+class StemBereiken
+{
+private:
+   std::array<StemBereik *, 4> bereiken;
+   
+public:
+   StemBereiken();
+   ~StemBereiken();
+   void maak_bereiken(Harmonie *harmonie);
 };
 
 // ---------- AkkoordNoot ----------
@@ -172,7 +208,7 @@ public:
    void print();
 };
 
-// ---------- Toonaard ----------
+// ---------- Trap ----------
 
 
 class Toonaard;
@@ -215,6 +251,7 @@ public:
    static const bool lang = false;
    Trap *zoek_noot(std::string nt);
    Trap *zoek_functie(std::string fu);
+   Trap *zoek_trap(NootNaam *nn);
    void print();
 };
 
@@ -236,6 +273,7 @@ public:
    void maak_trappen(Toetsen *tt);
    Trap *zoek_noot(std::string nt);
    Trap *zoek_functie(std::string fu);
+   Trap *zoek_trap(NootNaam *nn);
    void print();
 };
 
@@ -252,6 +290,7 @@ public:
    ~Toonaarden();
    void maak_trappen(Toetsen *tt);
    Toonaard *zoek(const std::string tna);
+   Trap *zoek_trap(NootNaam *nn);
    void print();
 };
 
@@ -263,28 +302,53 @@ public:
 class Harmonie
 {
 private:
-   Toetsen    *toetsen;
-   Toonaarden *toonaarden;
+   Toetsen      *toetsen;
+   Toonaarden   *toonaarden;
+   StemBereiken *bereiken;
 
 public:
    Harmonie();   
    ~Harmonie();
+   Toetsen *get_toetsen()
+   {
+      return toetsen;
+   }
    Toonaard *zoek_toonaard(const std::string letters);
+   Trap *zoek_trap(NootNaam *nn);
    void print();
 };
 
-// ----------  ----------
+// ---------- Fout ----------
+
+class Fout
+{
+private:
+   int nr;
+   std::string tekst;   
+
+public:
+   Fout(int nnr, std::string txt);
+   ~Fout();
+   int get_nr();
+   std::string get_tekst();
+   void print();
+};
+
+// ---------- Noot ----------
 
 class Noot
 {
 private:
-   Trap *trap; // weak ptr
-   int   octaaf; // 1: ' 2: '' -1:,
-   int   lengte; // 1, 2, 4 of 8
+   Trap       *trap; // weak ptr
+   int         octaaf; // 1: ' 2: '' -1:,
+   int         lengte; // 1, 2, 4 of 8
+   std::string gelezen_tekst; // wordt gebruikt als trap null is
+   int         midi;  // werkelijke toonhoogte
 
 public:
-   Noot(Trap *trp, int oct, int len);
+   Noot(Trap *trp, int oct, int len, std::string tkst);
    ~Noot();
+   //static Noot *maak_noot(NootNaam *nn, int oct);
    Trap *get_trap()
    {
       return trap;
@@ -298,6 +362,7 @@ public:
       return lengte;
    }
    std::string to_s();
+   void print();
 };
 
 // ---------- Functie ----------
@@ -305,10 +370,14 @@ public:
 class Functie
 {
 private:
-
+   Trap       *trap; // weak ptr
+   std::string tekst;
+   
 public:
-   Functie();   
-   ~Functie();   
+   Functie(Trap *trp, std::string tkst);   
+   ~Functie();
+   Trap       *get_trap();
+   std::string get_tekst();
 };
 
 // ---------- Tel ----------
@@ -316,10 +385,13 @@ public:
 class Tel
 {
 private:
+   static int            teller;
+   int                   nr;
    int                   lengte;  // 1: heel, 2: half, 4: kwart, 8: achtste
    std::array<Noot *, 4> stemmen;
    Functie              *functie;
    Toonaard             *toonaard;
+   std::vector<Fout *>   fouten;
 
 public:
    Tel();
@@ -328,7 +400,13 @@ public:
    void  set_toonaard(Toonaard *tb);
    Noot *get_stem(int i);
    void  set_stem(int i, Noot *nt);
+   void set_functie(Functie *fu);
+   int get_nr()
+   {
+      return nr;
+   }
    void print();
+   nlohmann::json to_json();
 };
 
 // ---------- Maat ----------
@@ -354,8 +432,11 @@ public:
       return tellen[i];
    }
    void print();
+   nlohmann::json to_json();
+   void for_each(std::function<void(Maat *, Tel *)> fu);   
 };
-// ----------  ----------
+
+// ---------- Lied ----------
 
 class Lied
 {
@@ -363,6 +444,7 @@ private:
    Harmonie           *harmonie;
    Textfile           *file;
    std::vector<Maat *> maten;
+   std::vector<Fout *> fouten;
    
 public:
    Lied(Harmonie *hrm, const std::string fn);
@@ -377,11 +459,14 @@ public:
    void parse_v1(const std::string line, bool maak_noot);
    void parse_fu(const std::string line);
    void parse_ke(const std::string line);
-   int s_to_octaaf(std::string s);
-   int s_to_lengte(std::string s);
+   static int s_to_octaaf(std::string s);
+   static int s_to_lengte(std::string s);
    void print();
-   void to_ly_voice(std::ofstream &lyf, int i);
+   nlohmann::json to_json();
    void to_ly();
+   void add_fout(Fout *f);
+   void for_each(std::function<void(Maat *, Tel *)> fu);
+   void maak_stemmen();
 };
 
 #endif

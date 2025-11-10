@@ -23,6 +23,14 @@ std::map<std::string, std::set<std::string>>functies
    { "IV", { "V", "I" } }
 };
 
+std::array<std::array<std::string, 2>, 4> stembereiken
+{{
+   { "c'", "a''"},  // sopraan
+   { "g", "c''" },  // alt
+   { "c", "g'" },   // tenor
+   { "e,", "c'" }   // bas
+}};
+
 
 
 std::string to_lower(const std::string &s)
@@ -45,7 +53,7 @@ NootNaam::NootNaam(const std::string &nm, int mnr) : naam(nm), midi(mnr)
 
 NootNaam::~NootNaam()
 {
-   std::cout << "~NootNaam\n";
+   //std::cout << "~NootNaam\n";
 }
 
 std::string NootNaam::get_naam()
@@ -74,7 +82,7 @@ NootNamen::NootNamen()
 
 Toets::~Toets()
 {
-   std::cout << "~Toets\n";
+   //std::cout << "~Toets\n";
 }
 
 
@@ -86,7 +94,7 @@ Wit::Wit(NootNaam *nn) : nootnaam(nn)
 
 Wit::~Wit()
 {
-   std::cout << "~Wit\n";
+   //std::cout << "~Wit\n";
    delete nootnaam;
 }
 
@@ -96,6 +104,11 @@ bool Wit::heeft_naam(std::string nm)
 }
 
 NootNaam *Wit::get(int ri)
+{
+   return nootnaam;
+}
+
+NootNaam *Wit::get_nn(std::string nn)
 {
    return nootnaam;
 }
@@ -115,7 +128,7 @@ Zwart::Zwart(NootNaam *nn_lg, NootNaam *nn_hg) : nootnaam_laag(nn_lg), nootnaam_
 
 Zwart::~Zwart()
 {
-   std::cout << "~Zwart\n";
+   //std::cout << "~Zwart\n";
    delete nootnaam_laag;
    delete nootnaam_hoog;
 }
@@ -159,6 +172,18 @@ NootNaam *Zwart::get(int ri)
    }
 }
 
+NootNaam *Zwart::get_nn(std::string nm)
+{
+   if (nm == nootnaam_hoog->get_naam())
+   {
+      return nootnaam_hoog;
+   }
+   else
+   {
+      return nootnaam_laag;
+   }
+}
+
 void Zwart::print()
 {
    std::cout << "Zwart\n";
@@ -175,7 +200,7 @@ ToetsWijzer::ToetsWijzer(Toetsen  *tt, int i) : toetsen(tt), index(i)
 
 ToetsWijzer::~ToetsWijzer()
 {
-   std::cout << "~ToetsWijzer\n";
+   //std::cout << "~ToetsWijzer\n";
 }
 
 NootNaam *ToetsWijzer::get(int ri)
@@ -219,7 +244,7 @@ Toetsen::Toetsen()
 
 Toetsen::~Toetsen()
 {
-   std::cout << "~Toetsen\n";
+   //std::cout << "~Toetsen\n";
    for (Toets *t: toetsen)
    {
       delete t;
@@ -231,7 +256,10 @@ Toets *Toetsen::get(int i)
    return toetsen[i];
 }
 
-ToetsWijzer *Toetsen::zoek_noot(std::string nm)
+/**
+ * Zoek een noot en geef een ToetsWijzer terug.
+ */ 
+ToetsWijzer *Toetsen::zoek_noot_tw(std::string nm)
 {
    int i = 0;
    for (Toets *t: toetsen)
@@ -247,6 +275,21 @@ ToetsWijzer *Toetsen::zoek_noot(std::string nm)
    return nullptr;
 }
 
+
+NootNaam *Toetsen::zoek_noot(std::string nm)
+{
+   for (Toets *t: toetsen)
+   {
+      if (t->heeft_naam(nm))
+      {
+         if (debug) std::cout << "   gevonden\n";
+         return t->get_nn(nm);
+      }
+   }
+   if (debug) std::cout << "   niet gevonden\n";
+   return nullptr;
+}
+
 void Toetsen::print()
 {
    for (Toets *t: toetsen)
@@ -255,7 +298,126 @@ void Toetsen::print()
    }
 }
 
+// ---------- StemBereik ----------
 
+StemBereik::StemBereik(Noot *lg, Noot *hg) : laag(lg), hoog(hg)
+{
+}
+
+StemBereik::~StemBereik()
+{
+   delete laag;
+   delete hoog;
+}
+
+// ---------- StemBereiken ----------
+
+StemBereiken::StemBereiken()
+{
+}
+
+StemBereiken::~StemBereiken()
+{
+   for (int i=0; i<4; i++)
+   {
+      delete bereiken[i];
+   }
+}
+
+void StemBereiken::maak_bereiken(Harmonie *harmonie)
+{
+   NootNaam *nn = harmonie->get_toetsen()->zoek_noot("c");
+   if (nn != nullptr)
+   {
+      nn->print();
+   }
+
+   // patroon voor één noot zonder lengte zoals: gis'
+   const std::regex   patroon(R"(([a-z]+)((?:\'{0,3}|\,{0,2})))");
+   
+   // Er zijn 4 stemmen: sop, alt, ten en bas.
+   for (int i=0; i<4; i++)
+   {
+      std::string laag = stembereiken[i][0];
+      std::string hoog = stembereiken[i][1];
+      
+      std::cout << "bereik " << laag << " " << hoog << "\n";
+      
+      std::string nootnaam_lg;
+      std::string acckomma_lg;
+      std::string gelezen_lg;
+      std::string nootnaam_hg;
+      std::string acckomma_hg;
+      std::string gelezen_hg;
+      
+      std::smatch match_laag;
+      if (std::regex_search(laag, match_laag, patroon))
+      {
+         //std::cout << match_laag.size() << " sub-match found!\n";
+         //for (auto submatch : match_laag) 
+         //{
+         //   std::cout << "submatch: " << submatch << "\n";
+         //}
+         gelezen_lg  = match_laag[0];
+         nootnaam_lg = match_laag[1];
+         acckomma_lg = match_laag[2];
+         std::cout << "laag " << nootnaam_lg << "---" << acckomma_lg << "\n";
+      }
+      else
+      {
+         throw ParserError("Interne fout 1, foute naam in bereik");
+      }
+
+      std::smatch match_hoog;
+      if (std::regex_search(hoog, match_hoog, patroon))
+      {
+         //std::cout << match_laag.size() << " sub-match found!\n";
+         //for (auto submatch : match_laag) 
+         //{
+         //   std::cout << "submatch: " << submatch << "\n";
+         //}
+         gelezen_hg  = match_laag[0];
+         nootnaam_hg = match_hoog[1];
+         acckomma_hg = match_hoog[2];
+         std::cout << "hoog " << nootnaam_hg << "---" << acckomma_hg << "\n";
+      }
+      else
+      {
+         throw ParserError("Interne fout 2, foute naam in bereik");
+      }
+      
+      int oct_lg = Lied::s_to_octaaf(acckomma_lg);
+      int oct_hg = Lied::s_to_octaaf(acckomma_hg);
+      
+      // Zoek de overeenkomsting nootnamen
+      NootNaam *nn_lg = harmonie->get_toetsen()->zoek_noot(nootnaam_lg);
+      NootNaam *nn_hg = harmonie->get_toetsen()->zoek_noot(nootnaam_hg);
+      
+      Trap *tr_lg = harmonie->zoek_trap(nn_lg);
+      Trap *tr_hg = harmonie->zoek_trap(nn_hg);
+      
+      if (nn_lg == nullptr || nn_hg == nullptr)
+      {
+         throw ParserError("Interne fout 3, foute naam in bereik");
+      }
+
+      if (tr_lg == nullptr || tr_hg == nullptr)
+      {
+         throw ParserError("Interne fout 4, foute naam in bereik");
+      }
+      
+      // Maak 2 noten zonder lengte noch tekst
+      Noot *nt_lg = new Noot(tr_lg, oct_lg, 0, gelezen_lg);
+      Noot *nt_hg = new Noot(tr_hg, oct_hg, 0, gelezen_hg);
+      nt_lg->print();
+      nt_hg->print();
+      
+      StemBereik *bereik = new StemBereik(nt_lg, nt_hg);
+      bereiken[i] = bereik;
+   }
+}
+
+   
 // ---------- AkkoordNoot ----------
 
 AkkoordNoot::AkkoordNoot(NootNaam *nt, int rl, int st) : noot(nt), rol(rl), stap(st)
@@ -264,7 +426,7 @@ AkkoordNoot::AkkoordNoot(NootNaam *nt, int rl, int st) : noot(nt), rol(rl), stap
 
 AkkoordNoot::~AkkoordNoot()
 {
-   std::cout << "~AkkoordNoot\n";
+   //std::cout << "~AkkoordNoot\n";
 }
 
 void AkkoordNoot::set_akkoord(Akkoord *akk)
@@ -291,7 +453,7 @@ Akkoord::Akkoord(Trap *tr, AkkoordNoot *gg, AkkoordNoot *tt, AkkoordNoot *kk, in
 
 Akkoord::~Akkoord()
 {
-   std::cout << "~Akkoord\n";
+   //std::cout << "~Akkoord\n";
    delete g;
    delete t;
    delete k;
@@ -367,7 +529,7 @@ Trap::Trap(std::string nm, int stp, Toonaard *tona, NootNaam *nt) : noot(nt), na
 
 Trap::~Trap()
 {
-   std::cout << "~Trap\n";
+   //std::cout << "~Trap\n";
 
    for (Akkoord *akk: akkoorden)
    {
@@ -473,7 +635,7 @@ Toonladder::Toonladder()
 
 Toonladder::~Toonladder()
 {
-   std::cout << "~Toonladder\n";
+   //std::cout << "~Toonladder\n";
    
    for (Trap *tr: trappen)
    {
@@ -532,6 +694,21 @@ Trap *Toonladder::zoek_functie(std::string fu)
    return nullptr;
 }
 
+/**
+ * Zoek in deze toonladder een trap
+ * waarin een bepaalde nootnaam voorkomt.
+ */ 
+Trap *Toonladder::zoek_trap(NootNaam *nn)
+{
+   for (Trap *tr: trappen)
+   {
+      if (tr->get_noot()  == nn)
+      {
+         return tr;
+      }
+   }
+   return nullptr;
+}
 
 //constexpr bool lang = false;
 
@@ -588,7 +765,7 @@ Toonaard::Toonaard(std::string nm, int ri) : naam(nm), richting(ri)
 
 Toonaard::~Toonaard()
 {
-   std::cout << "~Toonaard\n";
+   //std::cout << "~Toonaard\n";
    delete toonladder;
 }
 
@@ -616,7 +793,7 @@ void Toonaard::maak_trappen(Toetsen *tt)
 {
    std::string nm = to_lower(naam);
    if (debug) std::cout << naam << " " << nm << "\n";
-   ToetsWijzer *wzr = tt->zoek_noot(nm);
+   ToetsWijzer *wzr = tt->zoek_noot_tw(nm);
    if (wzr != nullptr)
    {
       NootNaam *nn1 = wzr->get(richting);
@@ -675,6 +852,11 @@ Trap *Toonaard::zoek_functie(std::string fu)
    return toonladder->zoek_functie(fu);
 }
 
+Trap *Toonaard::zoek_trap(NootNaam *nn)
+{
+   return toonladder->zoek_trap(nn);
+}
+
 void Toonaard::print()
 {
    std::cout << "## Toonaard " << naam << " " << richting << "\n\n";
@@ -709,7 +891,7 @@ Toonaarden::Toonaarden()
 
 Toonaarden::~Toonaarden()
 {
-   std::cout << "~Toonaarden\n";
+   //std::cout << "~Toonaarden\n";
    for (Toonaard *to: toonaarden)
    {
       delete to;
@@ -736,6 +918,23 @@ Toonaard *Toonaarden::zoek(const std::string tna)
    return nullptr;
 }
 
+/**
+ * Zoek een trap die bij een nootnaam past.
+ * Er wordt gezocht in alle toonaarden.
+ */ 
+Trap *Toonaarden::zoek_trap(NootNaam *nn)
+{
+   for (Toonaard *ta: toonaarden)
+   {
+      Trap *tr = ta->zoek_trap(nn);
+      if (tr != nullptr)
+      {
+         return tr;
+      }
+   }
+   return nullptr;
+}
+
 void Toonaarden::print()
 {
    std::cout << "\n# Toonaarden\n\n";
@@ -747,21 +946,30 @@ void Toonaarden::print()
 
 // ---------- Harmonie ----------
 
-Harmonie::Harmonie() : toetsen(new Toetsen()), toonaarden(new Toonaarden())
+Harmonie::Harmonie() : toetsen(new Toetsen()), 
+                       toonaarden(new Toonaarden()),
+                       bereiken(new StemBereiken())
 {
    toonaarden->maak_trappen(toetsen);
+   bereiken->maak_bereiken(this);
 }
 
 Harmonie::~Harmonie()
 {
-   std::cout << "~Harmonie\n";
+   //std::cout << "~Harmonie\n";
    delete toetsen;
    delete toonaarden;
+   delete bereiken;
 }
 
 Toonaard *Harmonie::zoek_toonaard(const std::string letters)
 {
    return toonaarden->zoek(letters);
+}
+
+Trap *Harmonie::zoek_trap(NootNaam *nn)
+{
+   return toonaarden->zoek_trap(nn);
 }
 
 void Harmonie::print()
@@ -770,16 +978,67 @@ void Harmonie::print()
    toonaarden->print();
 }
 
+// ----------  Fout ----------
+
+Fout::Fout(int nnr, std::string txt) : nr(nnr), tekst(txt)
+{
+}
+
+Fout::~Fout()
+{
+}
+
+int Fout::get_nr()
+{
+   return nr;
+}
+
+std::string Fout::get_tekst()
+{
+   return tekst;
+}
+
+void Fout::print()
+{
+   std::cout << "   fout " << nr << " " << tekst << "\n";
+}
+
 // ----------  Noot ----------
 
-Noot::Noot(Trap *trp, int oct, int len) : trap(trp), octaaf(oct), lengte(len)
+Noot::Noot(Trap *trp, int oct, int len, std::string tkst) : trap(trp), octaaf(oct), lengte(len), gelezen_tekst(tkst)
 {
+   midi = trp->get_noot()->get_midi();
+   if (oct > 0)
+   {
+      for (int i=0; i<oct; i++)
+      {
+         midi += 12;
+      }
+   }
+   else
+   if (oct < 0)
+   {
+      for (int i=0; i< -oct; i++)
+      {
+         midi -= 12;
+      }
+   }
 }
 
 Noot::~Noot()
 {
-   std::cout << "~Noot\n";
+   //std::cout << "~Noot\n";
 }
+
+/*
+// probleem, functie mag weg
+Noot *Noot::maak_noot(NootNaam *nn, int oct)
+{
+   Noot *noot = new Noot(nullptr, oct, 0, "");
+   
+   return noot;
+}
+ */
 
 std::string Noot::to_s()
 {
@@ -791,6 +1050,7 @@ std::string Noot::to_s()
    else
    {
       std::cout << "      trap nullptr\n";
+      return gelezen_tekst;
    }
    std::string nootnm = get_trap()->get_noot()->get_naam();
    int oct = get_octaaf();
@@ -828,20 +1088,45 @@ std::string Noot::to_s()
    return nootnm;
 }
 
+void Noot::print()
+{
+   std::cout << "noot ";
+   if (trap != nullptr)
+   {
+      std::cout << trap->get_noot()->get_naam();
+   }
+   else
+   {
+      std::cout << gelezen_tekst;
+   }
+   std::cout << " oct " << octaaf << " lengte " << lengte << " " << midi << "\n";  
+}
+
 // ----------  Functie ----------
 
-Functie::Functie()
+Functie::Functie(Trap *trp, std::string tkst) : trap(trp), tekst(tkst)
 {
 }
 
 Functie::~Functie()
 {
-   std::cout << "~Functie\n";
+   //std::cout << "~Functie\n";
+}
+Trap       *Functie::get_trap()
+{
+   return trap;
+}
+
+std::string Functie::get_tekst()
+{
+   return tekst;
 }
 
 // ----------  Tel ----------
 
-Tel::Tel() : lengte(0), functie(nullptr), toonaard(nullptr)
+int Tel::teller = 1;
+
+Tel::Tel() : nr(teller++), lengte(0), functie(nullptr), toonaard(nullptr)
 {
    stemmen[0] = nullptr;
    stemmen[1] = nullptr;
@@ -851,7 +1136,7 @@ Tel::Tel() : lengte(0), functie(nullptr), toonaard(nullptr)
 
 Tel::~Tel()
 {
-   std::cout << "~Tel\n";
+   //std::cout << "~Tel\n";
    if (stemmen[0] != nullptr) delete stemmen[0];
    if (stemmen[1] != nullptr) delete stemmen[1];
    if (stemmen[2] != nullptr) delete stemmen[2];
@@ -880,6 +1165,11 @@ void Tel::set_stem(int i, Noot *nt)
    stemmen[i] = nt;
 }
 
+void Tel::set_functie(Functie *fu)
+{
+   functie = fu;
+}
+
 void Tel::print()
 {
    Noot *noot = stemmen[0]; // v1
@@ -890,11 +1180,59 @@ void Tel::print()
     */
    std::cout << "      Tel v1 " << (noot != nullptr) << " len " << len << "\n";
    std::cout << "         trap " << (noot->get_trap() != nullptr) << "\n";
-   std::cout << "         trap noot " << (noot->get_trap()->get_noot() != nullptr) << "\n";
+   if (noot->get_trap() != nullptr)
+   {
+      std::cout << "         trap noot " << (noot->get_trap()->get_noot() != nullptr) << "\n";
 
-   std::string naam = noot->get_trap()->get_noot()->get_naam();
-   std::cout << "         naam " << naam << len << "\n";
+      std::string naam = noot->get_trap()->get_noot()->get_naam();
+      std::cout << "         naam " << naam << len << "\n";
+   }
+   else
+   {
+      std::cout << "         naam xx\n";
+   }
+   if (functie != nullptr)
+   {
+      std::cout << "         functie "<< functie->get_trap()->get_naam() << "\n";
+   }
 }
+
+nlohmann::json Tel::to_json()
+{
+   nlohmann::json tel_js;
+   nlohmann::json stemmen_js;
+   nlohmann::json fouten_js;
+
+   if (stemmen[0] != nullptr)
+   {
+      stemmen_js[0] = stemmen[0]->to_s();
+   }
+   else
+   {
+      // In this case stemmen[0] is null
+      // due to the missing first key
+      stemmen_js[0] = "r4";
+   }
+   stemmen_js[1] = "r4";
+   stemmen_js[2] = "r4";
+   stemmen_js[3] = "r4";
+   tel_js["stemmen"] = stemmen_js;
+
+   tel_js["nr"]      = nr;
+
+   int i = 0;
+   for (Fout *f: fouten)
+   {
+      nlohmann::json fout_js;
+      fout_js["nr"]    = f->get_nr();
+      fout_js["tekst"] = f->get_tekst();
+      fouten_js[i]     = fout_js;
+      i++;
+   }
+   tel_js["fouten"]  = fouten_js;
+   return tel_js;
+}
+
 
 // ----------  Maat ----------
 
@@ -904,7 +1242,7 @@ Maat::Maat()
 
 Maat::~Maat()
 {
-   std::cout << "~Maat\n";
+   //std::cout << "~Maat\n";
    for (Tel *tel: tellen)
    {
       delete tel;
@@ -920,6 +1258,24 @@ void Maat::print()
    }
 }
 
+nlohmann::json Maat::to_json()
+{
+   nlohmann::json maat;
+   for (Tel *tl: tellen)
+   {
+      maat.push_back(tl->to_json());
+   }
+   return maat;
+}
+
+void Maat::for_each(std::function<void(Maat *, Tel *)> fu)
+{
+   for (Tel *tel: tellen)
+   {
+      fu(this, tel);
+   }
+}
+
 // ----------  Lied ----------
 
 Lied::Lied(Harmonie *hrm, const std::string fn) : harmonie(hrm), file(new Textfile(fn))
@@ -928,7 +1284,7 @@ Lied::Lied(Harmonie *hrm, const std::string fn) : harmonie(hrm), file(new Textfi
 
 Lied::~Lied()
 {
-   std::cout << "~Lied\n";
+   //std::cout << "~Lied\n";
    //delete harmonie; // weak
    delete file;
    for (Maat *m: maten)
@@ -1179,11 +1535,13 @@ void Lied::parse_v1(const std::string line, bool maak_noot)
          huidige_tna = tel0->get_toonaard();
          if (huidige_tna == nullptr)
          {
+            add_fout(new Fout(1, "De eerste toonaard ontbreekt"));
             throw ParserError("De eerste toonaard ontbreekt");
          }
       }
       else
       {
+         add_fout(new Fout(1, "De eerste toonaard ontbreekt"));
          throw ParserError("De eerste toonaard ontbreekt");
       }
       std::cout << "start toonaard " << huidige_tna->get_naam() << "\n";
@@ -1247,6 +1605,7 @@ void Lied::parse_v1(const std::string line, bool maak_noot)
       std::string cijfer   = (*it)[5];
                
       std::cout << "i: " << i << " letters " <<  letters << " acckomma " << acckomma <<  " cijfer "  << cijfer  << "\n";
+      std::string noottekst = letters + acckomma + cijfer;
 
       if (maak_noot)
       {
@@ -1264,20 +1623,29 @@ void Lied::parse_v1(const std::string line, bool maak_noot)
                huidige_tna = tna;
             }
          }
-
       
+         bool fout = false;
          std::cout << "zoek noot in toonaard " << huidige_tna->get_naam() << "\n";
          Trap * trap = huidige_tna->zoek_noot(letters);
          if (trap == nullptr)
          {
-            throw ParserError("Noot niet in toonladder");
+            fout = true;
+            //throw ParserError("Noot niet in toonladder");
          }
-         std::cout << "noot trap gevonden\n";
-      
+         else
+         {
+            std::cout << "noot trap gevonden\n";
+         }
 
-         Noot *noot = new Noot(trap, s_to_octaaf(acckomma), s_to_lengte(cijfer));
+         Noot *noot = new Noot(trap, s_to_octaaf(acckomma), s_to_lengte(cijfer), noottekst);
          Tel  *tl = get_tel(i);
          tl->set_stem(0, noot);
+         if (fout)
+         {
+            std::cout << "noot niet in toonladder\n";
+            add_fout(new Fout(tl->get_nr(), "Noot niet in toonladder"));
+            fout = false;
+         }
       }
       else
       {
@@ -1344,14 +1712,18 @@ void Lied::parse_fu(const std::string line)
          }
       }
       
-      
-      Trap * trap = huidige_tna->zoek_functie(romcijfer);
+      Tel  *tel  = get_tel(i);
+      Trap *trap = huidige_tna->zoek_functie(romcijfer);
       if (trap == nullptr)
       {
+         add_fout(new Fout(tel->get_nr(), "functie niet in toonladder"));
          throw ParserError("Functie niet in toonladder");
       }
       std::cout << "functie trap gevonden\n";
       
+
+      Functie *fun = new Functie(trap, romcijfer);
+      tel->set_functie(fun);      
       /*
       Noot *noot = new Noot(trap, s_to_octaaf(acckomma), s_to_lengte(cijfer));
       Tel  *tl = get(i);
@@ -1469,161 +1841,70 @@ void Lied::print()
    {
       mt->print();
    }
-}
-
-void Lied::to_ly_voice(std::ofstream &lyf, int i)
-{
-   //lyf << "c''4 d''4 e''4 f''4";
-   lyf << "   ";
-   for (unsigned int j = 0; j<tellen_size(); j++)
+   for (Fout *fout: fouten)
    {
-      Tel *tel = get_tel(j);
-      Noot *noot = tel->get_stem(i);
-      if (noot != nullptr)
-      {
-         lyf << noot->to_s() << " ";
-      }
-   }
-   lyf << "\n";
-}
-
-/*
-void Lied::to_ly()
-{
-    std::ofstream lyf;
-    lyf.open("muziek.ly");
-    std::cout << lyf.is_open() << "\n";
-    lyf <<
-R"EOF(\version "2.24.4"
-
-\include "roman_numeral_analysis_tool.ily"
-
-\pointAndClickOff
-
-\header
-{
-   title =  "oef sopr gegeven2"
-}
-
-\layout
-{
-   \context 
-   { 
-      \Score
-      skipBars = ##t
+      fout->print();
    }
 }
 
-global =
+
+void Lied::add_fout(Fout *f)
 {
-   \time 4/4 \key g \major
+   fouten.push_back(f);
 }
 
-VoiceOne =
+nlohmann::json Lied::to_json()
 {
-   \override Score.BarNumber.break-visibility = #end-of-line-invisible
-   \set Score.currentBarNumber = 1
-   % Print a bar number every second measure
-   \set Score.barNumberVisibility = #(every-nth-bar-number-visible 1)
+   nlohmann::json lied_js;
+   nlohmann::json maten_js;
+   for (Maat *m: maten)
+   {
+      maten_js.push_back(m->to_json());
+   }
+   lied_js["maten"] = maten_js;
 
-   \clef "treble"
-   \global
-)EOF";
-   nlohmann::json data;
-   data["v1"] = "g''4 a''4 g''4 e''4";
-   inja::render_to(lyf, "{{ v1 }}", data );
-   //to_ly_voice(lyf, 0);
-
-   lyf <<
-R"EOF(}
-
-VoiceTwo =
-{
-   \clef "treble" 
-   \global
-)EOF";
+   nlohmann::json fouten_js = nlohmann::json::array();
+   int i = 0;
+   for (Fout *f: fouten)
+   {
+      nlohmann::json fout_js;
+      fout_js["nr"]    = f->get_nr();
+      fout_js["tekst"] = f->get_tekst();
+      fouten_js[i]     = fout_js;
+      i++;
+   }
+   lied_js["fouten"]  = fouten_js;
    
-   to_ly_voice(lyf, 1);
-
-   lyf <<
-R"EOF(}
-
-VoiceThree =
-{
-   \clef "bass"
-   \global 
-)EOF";
-   
-   to_ly_voice(lyf, 2);
-
-   lyf <<
-R"EOF(}
-
-VoiceFour =
-{
-   \clef "bass"
-   \global
-)EOF";
-   
-   to_ly_voice(lyf, 3);
-
-   lyf <<
-R"EOF(}
-
-analysis = \lyricmode
-{
-   %\override LyricText.self-alignment-X = #-0.6
-   %\offset StanzaNumber.X-offset #-3
-   %\set stanza  = #"G:"
-
-   % For bare Roman numerals, \rN simply outputs the string.
-   \markup \rN { I }
-   \markup \rN { I }
-   \markup \rN { V }
-   \markup \rN { I }
+   return lied_js;
 }
-
-
-% The score definition
-\score
-{
-   <<
-      \new ChoirStaff
-      <<
-         \context Staff = "1"
-         << 
-            \mergeDifferentlyDottedOn\mergeDifferentlyHeadedOn
-            \context Voice = "VoiceOne" {  \voiceOne \VoiceOne }
-            \context Voice = "VoiceTwo" {  \voiceTwo \VoiceTwo }
-         >>
-         \context Staff = "2" 
-         <<
-            \mergeDifferentlyDottedOn\mergeDifferentlyHeadedOn
-            \context Voice = "VoiceThree" {  \voiceOne \VoiceThree }
-            \context Voice = "VoiceFour"  {  \voiceTwo \VoiceFour }
-            \context Lyrics \lyricsto "VoiceFour" { \analysis  }
-         >>
-      >>
-        
-   >>
-   \layout {}
-   % To create MIDI output, uncomment the following line:
-   %  \midi {\tempo 4 = 100 }
-}
-)EOF";
-    
-    lyf.close();
-}
- */
 
 void Lied::to_ly()
 {
    inja::Environment env;
 
+   nlohmann::json lied_js = to_json();
    nlohmann::json data;
-   data["name"] = "world";
+   data["lied"] = lied_js;
 
    // Or directly read a template file
    inja::Template temp = env.parse_template("./templates/muziek.tly");
    env.write(temp, data, "./muziek.ly");
 }
+
+void Lied::for_each(std::function<void(Maat *, Tel *)> fu)
+{
+   std::cout << "maat\n";
+   for (Maat *maat: maten)
+   {
+      maat->for_each(fu);
+   }
+}
+
+void Lied::maak_stemmen()
+{
+   for_each([](Maat *m, Tel *t)
+   {
+      std::cout << "   tel\n";
+   });
+}
+

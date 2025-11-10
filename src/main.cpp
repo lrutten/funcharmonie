@@ -38,12 +38,14 @@ void Main::open()
    {
       lied->parse();
       lied->print();
-      lied->to_ly();
+      lied->maak_stemmen();
+      //lied->to_ly();
    }
    catch(ParserError fout)
    {
       std::cout << "Parser fout: " << fout.get_melding() << "\n";
    }
+   lied->to_ly();
 
    delete lied;
 }
@@ -57,6 +59,8 @@ int main(int argc, char** argv)
 {
    Main *mn = new Main();
    //mn->print();
+   
+   // voorlopig geen lees lied
    mn->open();
 
    delete mn;
