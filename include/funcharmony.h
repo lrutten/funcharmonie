@@ -177,15 +177,19 @@ class AkkoordNoot
 private:
    Akkoord  *akkoord;
    NootNaam *noot;
-   int       rol;     // 0: grondnoot, 1: terts, 2: kwint
-   int       stap;
-
+   int       rol;   // 0: grondnoot, 1: terts, 2: kwint
+   int       stap;  // de ligging 0-6 van deze noot in de toonaard 
+                    // bv c: 0, e: 2, g: 4 
 public:
    AkkoordNoot(NootNaam *nt, int rl, int st);
    ~AkkoordNoot();
    void set_akkoord(Akkoord *akk);
    std::string get_naam();
    int get_stap() const;
+   NootNaam *get_noot()
+   {
+      return noot;
+   }
 };
 
 // ---------- Akkoord ----------
@@ -204,6 +208,11 @@ private:
 public:
    Akkoord(Trap *tr, AkkoordNoot *gg, AkkoordNoot *tt, AkkoordNoot *kk, int omk);
    ~Akkoord();
+   int get_omkering()
+   {
+      return omkering;
+   }
+   bool bevat(NootNaam *nn);
    int get_basisnoot_rang() const;
    void print();
 };
@@ -230,6 +239,7 @@ public:
    NootNaam *get_noot();
    void add_akkoord(Akkoord *akk);
    void maak_akkoorden();
+   Akkoord *zoek_akkoord(int omk);
    void iterate(auto fu);
    void print();
 };
@@ -334,21 +344,40 @@ public:
    void print();
 };
 
+// ---------- ANoot ----------
+
+class ANoot
+{
+protected:
+   int         lengte; // 1, 2, 4 of 8
+
+public:
+   ANoot(int len);
+   virtual ~ANoot();
+   int get_lengte()
+   {
+      return lengte;
+   }
+   virtual bool is_rust() = 0;
+   virtual Trap *get_trap() = 0;
+   virtual std::string to_s() = 0;
+   virtual void print() = 0;
+};
+
 // ---------- Noot ----------
 
-class Noot
+class Noot : public ANoot
 {
 private:
    Trap       *trap; // weak ptr
    int         octaaf; // 1: ' 2: '' -1:,
-   int         lengte; // 1, 2, 4 of 8
    std::string gelezen_tekst; // wordt gebruikt als trap null is
    int         midi;  // werkelijke toonhoogte
 
 public:
    Noot(Trap *trp, int oct, int len, std::string tkst);
    ~Noot();
-   //static Noot *maak_noot(NootNaam *nn, int oct);
+   bool is_rust();
    Trap *get_trap()
    {
       return trap;
@@ -364,6 +393,22 @@ public:
    std::string to_s();
    void print();
 };
+
+// ---------- Rust ----------
+
+class Rust : public ANoot
+{
+private:
+
+public:
+   Rust(int len);
+   ~Rust();
+   bool is_rust();
+   Trap *get_trap();
+   std::string to_s();
+   void print();
+};
+
 
 // ---------- Functie ----------
 
@@ -388,7 +433,7 @@ private:
    static int            teller;
    int                   nr;
    int                   lengte;  // 1: heel, 2: half, 4: kwart, 8: achtste
-   std::array<Noot *, 4> stemmen;
+   std::array<ANoot *, 4> stemmen;
    Functie              *functie;
    Toonaard             *toonaard;
    std::vector<Fout *>   fouten;
@@ -398,12 +443,24 @@ public:
    ~Tel();
    Toonaard *get_toonaard();
    void  set_toonaard(Toonaard *tb);
-   Noot *get_stem(int i);
-   void  set_stem(int i, Noot *nt);
+   ANoot *get_stem(int i);
+   void  set_stem(int i, ANoot *nt);
+   Functie *get_functie()
+   {
+      return functie;
+   }
    void set_functie(Functie *fu);
    int get_nr()
    {
       return nr;
+   }
+   int get_lengte()
+   {
+      return lengte;
+   }
+   void set_lengte(int l)
+   {
+      lengte = l;
    }
    void print();
    nlohmann::json to_json();
