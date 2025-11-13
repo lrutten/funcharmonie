@@ -30,6 +30,7 @@ public:
 };
 
 // ---------- NootNaam ----------
+class Noot;
 
 class NootNaam
 {
@@ -192,6 +193,24 @@ public:
    }
 };
 
+// ---------- AkkoordWijzer ----------
+
+class Akkoord;
+
+class AkkoordWijzer
+{
+private:
+   Akkoord *akkoord;
+   int      index;
+
+public:
+   AkkoordWijzer(Akkoord  *ak, int i);
+   ~AkkoordWijzer();
+   NootNaam *get();
+   void dec();
+};
+
+
 // ---------- Akkoord ----------
 
 class Trap;
@@ -214,6 +233,8 @@ public:
    }
    bool bevat(NootNaam *nn);
    int get_basisnoot_rang() const;
+   NootNaam *get(int i);
+   AkkoordWijzer *zoek(NootNaam *nn);
    void print();
 };
 

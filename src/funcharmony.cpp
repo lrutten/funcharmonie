@@ -420,6 +420,8 @@ void StemBereiken::maak_bereiken(Harmonie *harmonie)
    
 // ---------- AkkoordNoot ----------
 
+constexpr int aantal_noten_akkoord = 3;
+
 AkkoordNoot::AkkoordNoot(NootNaam *nt, int rl, int st) : noot(nt), rol(rl), stap(st)
 {
 }
@@ -445,7 +447,38 @@ int AkkoordNoot::get_stap() const
 }
 
 
+
+// ---------- AkkoordWijzer ----------
+
+AkkoordWijzer::AkkoordWijzer(Akkoord *akk,  int i) : akkoord(akk), index(i)
+{
+}
+
+AkkoordWijzer::~AkkoordWijzer()
+{
+   //std::cout << "~AkkoordWijzer\n";
+}
+
+NootNaam *AkkoordWijzer::get()
+{
+   return akkoord->get(index);
+}
+
+void AkkoordWijzer::dec()
+{
+   index--;
+   if (index < 0)
+   {
+      index = aantal_noten_akkoord - 1;
+   }
+   if (debug) std::cout << "         index " << index << "\n";
+}
+
+
+
+
 // ---------- Akkoord ----------
+
 
 Akkoord::Akkoord(Trap *tr, AkkoordNoot *gg, AkkoordNoot *tt, AkkoordNoot *kk, int omk) : trap(tr), g(gg), t(tt), omkering(omk), k(kk)
 {
@@ -490,6 +523,57 @@ bool Akkoord::bevat(NootNaam *nn)
       return false;
    }
 }
+
+NootNaam *Akkoord::get(int i)
+{
+   if (i == 0)
+   {
+      return g->get_noot();
+   }
+   else
+   if (i == 1)
+   {
+      return t->get_noot();
+   }
+   else
+   if (i == 2)
+   {
+      return k->get_noot();
+   }
+   else
+   {
+      return nullptr;
+   }
+}
+
+AkkoordWijzer *Akkoord::zoek(NootNaam *nn)
+{
+   for (int i = 0; i<aantal_noten_akkoord; i++)
+   {
+      AkkoordNoot *an = nullptr;
+      if (i == 0)
+      {
+         an = g;
+      }
+      else
+      if (i == 1)
+      {
+         an = t;
+      }
+      else
+      {
+         an = k;
+      }
+      
+      if (nn == an->get_noot())
+      {
+         // gevonden
+         return new AkkoordWijzer(this, i);
+      }
+   }
+   return nullptr;
+}
+
 
 void Akkoord::print()
 {

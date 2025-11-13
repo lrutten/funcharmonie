@@ -1007,10 +1007,29 @@ void Lied::maak_stemmen()
             bool in_akk = akk->bevat(noot->get_trap()->get_noot());
             if (in_akk)
             {
+               // Wijs de noot van de sopraan aan.
+               AkkoordWijzer *wijzer = akk->zoek(noot->get_trap()->get_noot());
                std::cout << "         in_akk\n";
+
+               NootNaam *nn_sop = wijzer->get();
+               std::cout << "            sop " << nn_sop->get_naam() << "\n";
+
+               wijzer->dec();
+               NootNaam *nn_alt = wijzer->get();
+               std::cout << "            alt " << nn_alt->get_naam() << "\n";
+
+               wijzer->dec();
+               NootNaam *nn_ten= wijzer->get();
+               std::cout << "            ten " << nn_ten->get_naam() << "\n";
+               
+               // Maak de noten met behulp van de namen
+               Noot *n_alt = nn_alt->maak_noot();
+               Noot *n_ten = nn_ten->maak_noot();
             }
             else
             {
+               // Foutafhandeling komt hier.
+               
                std::cout << "         !in_akk\n";
             }
          }

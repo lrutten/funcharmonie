@@ -12,6 +12,10 @@ run: build/funcharmonie
 	rm -vf muziek.*
 	build/funcharmonie
 
+gdb: build/funcharmonie
+	rm -vf muziek.*
+	gdb build/funcharmonie
+
 valgrind: build/funcharmonie
 	valgrind -s --leak-check=full --show-leak-kinds=all build/funcharmonie
 
