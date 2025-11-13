@@ -574,6 +574,15 @@ AkkoordWijzer *Akkoord::zoek(NootNaam *nn)
    return nullptr;
 }
 
+Noot *Akkoord::maak_noot(NootNaam *nn, int len)
+{
+   //Noot(Trap *trp, int oct, int len, std::string tkst);
+   Toonaard *toonaard = trap->get_toonaard();
+   Trap *trp = toonaard->zoek_trap(nn);
+   Noot *nt = new Noot(trp, 0, len, "");
+   nt->set_midi(nn->get_midi());
+   return nt;
+}
 
 void Akkoord::print()
 {

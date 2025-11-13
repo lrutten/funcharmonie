@@ -12,6 +12,9 @@
 constexpr int aantal_chrom_noten = 12;
 constexpr int aantal_diat_noten  = 7;
 
+constexpr int midi_laag = 21;   // laagste midicode A0
+constexpr int midi_hoog = 127;  // hoogste midicode G8
+
 // ---------- ParserError ----------
 
 class ParserError
@@ -235,6 +238,7 @@ public:
    int get_basisnoot_rang() const;
    NootNaam *get(int i);
    AkkoordWijzer *zoek(NootNaam *nn);
+   Noot *maak_noot(NootNaam *nn, int len);
    void print();
 };
 
@@ -257,6 +261,10 @@ public:
    ~Trap();
    std::string get_naam();
    int get_stap();
+   Toonaard *get_toonaard()
+   {
+      return toonaard;
+   }
    NootNaam *get_noot();
    void add_akkoord(Akkoord *akk);
    void maak_akkoorden();
@@ -410,6 +418,14 @@ public:
    int get_lengte()
    {
       return lengte;
+   }
+   int get_midi()
+   {
+      return midi;
+   }
+   void set_midi(int mdi)
+   {
+      midi = mdi;
    }
    std::string to_s();
    void print();

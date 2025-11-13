@@ -1023,8 +1023,11 @@ void Lied::maak_stemmen()
                std::cout << "            ten " << nn_ten->get_naam() << "\n";
                
                // Maak de noten met behulp van de namen
-               Noot *n_alt = nn_alt->maak_noot();
-               Noot *n_ten = nn_ten->maak_noot();
+               Noot *n_alt = akk->maak_noot(nn_alt, t->get_lengte());
+               Noot *n_ten = akk->maak_noot(nn_ten, t->get_lengte());
+
+               std::cout << "               noot alt " << n_alt->to_s() << "\n";
+               std::cout << "               noot ten " << n_ten->to_s() << "\n";
             }
             else
             {
