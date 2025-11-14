@@ -427,6 +427,10 @@ public:
    {
       midi = mdi;
    }
+   void onder(Noot *nt);
+   bool operator<(Noot &);
+   void verlaag();
+   void verhoog();
    std::string to_s();
    void print();
 };

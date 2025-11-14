@@ -54,6 +54,39 @@ bool Noot::is_rust()
    return false;
 }
 
+// Verlaag deze noot tot onder de gegeven noot.
+void Noot::onder(Noot *nt)
+{
+  while (midi < midi_hoog)
+  {
+     verhoog();
+  }
+
+  while (!(*this < *nt))
+  {
+     verlaag();
+  }
+}
+
+// Verlaag 1 octaaf.
+void Noot::verlaag()
+{
+   midi -= 12;
+   octaaf--;
+}
+
+// Verhoog 1 octaaf.
+void Noot::verhoog()
+{
+   midi += 12;
+   octaaf++;
+}
+
+bool Noot::operator<(Noot &nt)
+{
+   return midi < nt.midi;
+}
+
 std::string Noot::to_s()
 {
    //std::cout << "   to_s\n";
@@ -268,6 +301,23 @@ nlohmann::json Tel::to_json()
    nlohmann::json stemmen_js;
    nlohmann::json fouten_js;
 
+   for (int i = 0; i<4; i++)
+   {
+      if (stemmen[i] != nullptr)
+      {
+         stemmen_js[i] = stemmen[i]->to_s();
+      }
+      else
+      {
+         // In this case stemmen[i] is null
+         // due to the missing first key
+         nlohmann::json data;
+         data["lengte"] = lengte;
+         stemmen_js[i] = inja::render("r{{ lengte }}", data);
+      }
+   }
+   
+   /*
    if (stemmen[0] != nullptr)
    {
       stemmen_js[0] = stemmen[0]->to_s();
@@ -278,9 +328,11 @@ nlohmann::json Tel::to_json()
       // due to the missing first key
       stemmen_js[0] = "r4";
    }
+   
    stemmen_js[1] = "r4";
    stemmen_js[2] = "r4";
    stemmen_js[3] = "r4";
+    */
    tel_js["stemmen"] = stemmen_js;
 
    tel_js["nr"]      = nr;
@@ -961,6 +1013,9 @@ void Lied::for_each(std::function<void(Maat *, Tel *)> fu)
    }
 }
 
+/*
+ * Maak de alt, ten en bas stemmen.
+ */
 void Lied::maak_stemmen()
 {
    for_each([](Maat *m, Tel *t)
@@ -998,17 +1053,14 @@ void Lied::maak_stemmen()
          Akkoord *akk = trap->zoek_akkoord(0); // 0: basisligging
          
          
-         // Hier is een functiefout!!!!!!
-         // Inlezen functies is fout
-         
-         Noot *noot = dynamic_cast<Noot *>(anoot);
-         if (noot != nullptr && akk != nullptr)
+         Noot *n_sop = dynamic_cast<Noot *>(anoot);
+         if (n_sop != nullptr && akk != nullptr)
          {
-            bool in_akk = akk->bevat(noot->get_trap()->get_noot());
+            bool in_akk = akk->bevat(n_sop->get_trap()->get_noot());
             if (in_akk)
             {
                // Wijs de noot van de sopraan aan.
-               AkkoordWijzer *wijzer = akk->zoek(noot->get_trap()->get_noot());
+               AkkoordWijzer *wijzer = akk->zoek(n_sop->get_trap()->get_noot());
                std::cout << "         in_akk\n";
 
                NootNaam *nn_sop = wijzer->get();
@@ -1019,30 +1071,49 @@ void Lied::maak_stemmen()
                std::cout << "            alt " << nn_alt->get_naam() << "\n";
 
                wijzer->dec();
-               NootNaam *nn_ten= wijzer->get();
+               NootNaam *nn_ten = wijzer->get();
                std::cout << "            ten " << nn_ten->get_naam() << "\n";
+
+               NootNaam *nn_bas = akk->get(0); // Neem de basisnoot van het akkoord
+               std::cout << "            bas " << nn_bas->get_naam() << "\n";
                
                // Maak de noten met behulp van de namen
                Noot *n_alt = akk->maak_noot(nn_alt, t->get_lengte());
                Noot *n_ten = akk->maak_noot(nn_ten, t->get_lengte());
+               Noot *n_bas = akk->maak_noot(nn_bas, t->get_lengte());
 
+               std::cout << "               noot sop " << n_sop->to_s() << "\n";
                std::cout << "               noot alt " << n_alt->to_s() << "\n";
                std::cout << "               noot ten " << n_ten->to_s() << "\n";
+               std::cout << "               noot bas " << n_bas->to_s() << "\n";
+               
+               // Schik de noten onder elkaar.
+               n_alt->onder(n_sop);
+               n_ten->onder(n_alt);
+               n_bas->onder(n_ten);
+
+               std::cout << "               noot sop " << n_sop->to_s() << "\n";
+               std::cout << "               noot alt " << n_alt->to_s() << "\n";
+               std::cout << "               noot ten " << n_ten->to_s() << "\n";
+               std::cout << "               noot bas " << n_bas->to_s() << "\n";
+               
+               // Vul de stemmen
+               t->set_stem(1, n_alt);
+               t->set_stem(2, n_ten);
+               t->set_stem(3, n_bas);
             }
             else
             {
+               // De sopraan noot komt niet voor in het akkoord.
                // Foutafhandeling komt hier.
                
                std::cout << "         !in_akk\n";
+               // Bij fout, plaats rusten in alt, ten en bas
+               t->set_stem(1, new Rust(t->get_lengte()));
+               t->set_stem(2, new Rust(t->get_lengte()));
+               t->set_stem(3, new Rust(t->get_lengte()));
             }
          }
-         
-         
-         
-         // Enkel voor de test, plaats rusten in alt, ten en bas
-         t->set_stem(1, new Rust(t->get_lengte()));
-         t->set_stem(2, new Rust(t->get_lengte()));
-         t->set_stem(3, new Rust(t->get_lengte()));
       }
       else
       {

@@ -39,6 +39,14 @@ toon: muziek.svg
 toon-png: muziek.png
 	gwenview muziek.png
 
+muziek.midi: muziek.svg
+
+muziek.mp3: muziek.midi
+	~/bin/midi2mp3 muziek.midi
+
+luister: muziek.mp3
+	mpv muziek.mp3
+
 clean-svg:
 	rm -vf *.svg
 
