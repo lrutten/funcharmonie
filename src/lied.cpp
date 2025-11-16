@@ -954,7 +954,7 @@ void Lied::print()
    {
       mt->print();
    }
-   for (Fout *fout: fouten)
+   for (const auto &[nr, fout]: fouten)
    {
       fout->print();
    }
@@ -963,7 +963,7 @@ void Lied::print()
 
 void Lied::add_fout(Fout *f)
 {
-   fouten.push_back(f);
+   fouten.insert({f->get_nr(), f});
 }
 
 nlohmann::json Lied::to_json()
@@ -978,7 +978,7 @@ nlohmann::json Lied::to_json()
 
    nlohmann::json fouten_js = nlohmann::json::array();
    int i = 0;
-   for (Fout *f: fouten)
+   for (const auto &[nr, f]: fouten)
    {
       nlohmann::json fout_js;
       fout_js["nr"]    = f->get_nr();
@@ -1018,7 +1018,7 @@ void Lied::for_each(std::function<void(Maat *, Tel *)> fu)
  */
 void Lied::maak_stemmen()
 {
-   for_each([](Maat *m, Tel *t)
+   for_each([this](Maat *m, Tel *t)
    {
       std::cout << "   tel " << t->get_lengte() << "\n";
       ANoot *anoot = t->get_stem(0); // sop stem
@@ -1112,6 +1112,28 @@ void Lied::maak_stemmen()
                t->set_stem(1, new Rust(t->get_lengte()));
                t->set_stem(2, new Rust(t->get_lengte()));
                t->set_stem(3, new Rust(t->get_lengte()));
+               
+               
+               Toonaard *toonaard = n_sop->get_trap()->get_toonaard();
+               std::vector<Akkoord *> akkoorden = toonaard->lijst_pasakkoorden(n_sop->get_trap()->get_noot());
+               
+               // Maak een lijst van akkoorden die wel passen
+               //std::vector<Akkoord *> akkoorden = n_sop->get_trap()->lijst_pasakkoorden(n_sop->get_trap()->get_noot());
+
+               nlohmann::json lijst_js = nlohmann::json::array();
+               int k = 0;
+               for (Akkoord *akk: akkoorden)
+               {
+                  std::cout << "         wel akkoord " << akk->get_trap()->get_naam() << "\n";
+                  lijst_js[k] = akk->get_trap()->get_naam();
+                  k++;
+               }
+               nlohmann::json data;
+               data["akkoorden"] = lijst_js;
+               std::string fout_tekst = 
+                  inja::render("Functie past niet bij sopraan, wel {% for akk in akkoorden %}{{ akk }} {% endfor%}", data);
+               
+               add_fout(new Fout(t->get_nr(), fout_tekst));
             }
          }
       }

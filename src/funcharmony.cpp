@@ -839,6 +839,22 @@ Trap *Toonladder::zoek_trap(NootNaam *nn)
    return nullptr;
 }
 
+std::vector<Akkoord *> Toonladder::lijst_pasakkoorden(NootNaam *nn)
+{
+   std::vector<Akkoord *> lijst;
+   for (Trap *trap: trappen)
+   {
+      Akkoord *akk = trap->get_basisakkoord();
+      if (akk->bevat(nn))
+      {
+         std::cout << "      " << akk->get_trap()->get_naam() << "\n";
+         lijst.push_back(akk);
+      }
+   }
+   return lijst;
+}
+
+
 //constexpr bool lang = false;
 
 void Toonladder::print()
@@ -984,6 +1000,11 @@ Trap *Toonaard::zoek_functie(std::string fu)
 Trap *Toonaard::zoek_trap(NootNaam *nn)
 {
    return toonladder->zoek_trap(nn);
+}
+
+std::vector<Akkoord *> Toonaard::lijst_pasakkoorden(NootNaam *nn)
+{
+   return toonladder->lijst_pasakkoorden(nn);
 }
 
 void Toonaard::print()

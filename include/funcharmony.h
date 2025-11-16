@@ -234,6 +234,10 @@ public:
    {
       return omkering;
    }
+   Trap *get_trap()
+   {
+      return trap;
+   }
    bool bevat(NootNaam *nn);
    int get_basisnoot_rang() const;
    NootNaam *get(int i);
@@ -265,6 +269,10 @@ public:
    {
       return toonaard;
    }
+   Akkoord *get_basisakkoord()
+   {
+      return akkoorden[0];
+   }
    NootNaam *get_noot();
    void add_akkoord(Akkoord *akk);
    void maak_akkoorden();
@@ -291,6 +299,7 @@ public:
    Trap *zoek_noot(std::string nt);
    Trap *zoek_functie(std::string fu);
    Trap *zoek_trap(NootNaam *nn);
+   std::vector<Akkoord *> lijst_pasakkoorden(NootNaam *nn);
    void print();
 };
 
@@ -313,6 +322,7 @@ public:
    Trap *zoek_noot(std::string nt);
    Trap *zoek_functie(std::string fu);
    Trap *zoek_trap(NootNaam *nn);
+   std::vector<Akkoord *> lijst_pasakkoorden(NootNaam *nn);
    void print();
 };
 
@@ -539,10 +549,10 @@ public:
 class Lied
 {
 private:
-   Harmonie           *harmonie;
-   Textfile           *file;
-   std::vector<Maat *> maten;
-   std::vector<Fout *> fouten;
+   Harmonie             *harmonie;
+   Textfile             *file;
+   std::vector<Maat *>   maten;
+   std::map<int, Fout *> fouten;
    
 public:
    Lied(Harmonie *hrm, const std::string fn);
