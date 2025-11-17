@@ -199,11 +199,37 @@ void Rust::print()
    std::cout << " lengte " << lengte << "\n";  
 }
 
+// ----------  Ligging ----------
+
+constexpr std::string_view ew_to_s(Ligging ew)
+{
+    switch (ew)
+    {
+    case lig_geen: return "";
+    case lig_eng:  return "eng";
+    case lig_wijd: return "wijd";
+    default:       return "";
+    }
+}
 
 // ----------  Functie ----------
 
-Functie::Functie(Trap *trp, std::string tkst) : trap(trp), tekst(tkst)
+Functie::Functie(Trap *trp, std::string tkst, std::string kwsxt, std::string ew) : 
+   trap(trp), tekst(tkst), kwartsixt(kwsxt)
 {
+   if (ew == "e")
+   {
+      engwijd = lig_eng;
+   }
+   else
+   if (ew == "w")
+   {
+      engwijd = lig_wijd;
+   }
+   else
+   {
+      engwijd = lig_geen;
+   }
 }
 
 Functie::~Functie()
@@ -801,7 +827,11 @@ void Lied::parse_fu(const std::string line)
    std::cout << "huidige toonaard " << huidige_tna->get_naam() << "\n";
    
    // patroon voor de functies I, II, III, IV, V, VI en VII
-   const std::regex toonaard(R"((?:^|\s+)((?:IV|III|II|I|VII|VI|V)))");
+   //const std::regex toonaard(R"((?:^|\s+)((?:IV|III|II|I|VII|VI|V)))");
+
+   // patroon voor de functies I, II, III, IV, V, VI en VII
+   // nu ook met 64, 4, e en w
+   const std::regex toonaard(R"((?:^|\s+)((?:IV|III|II|I|VII|VI|V))((?:64|6)?)((?:e|w)?))");
             
    // overloop alle toonaarden van een regel, dus multi-match
    unsigned long i = 0;
@@ -812,9 +842,13 @@ void Lied::parse_fu(const std::string line)
       //std::cout << "Match";
                
       // Een toonaard bestaat uit romeinse cijfers
-      std::string romcijfer  = (*it)[1];
+      std::string romcijfer = (*it)[1];
+      std::string kwartsixt = (*it)[2];
+      std::string engwijd   = (*it)[3];
                
       std::cout << "romeins cijfer " <<  romcijfer << "\n";
+      std::cout << "kwartsixt      " <<  kwartsixt << "\n";
+      std::cout << "engwijd        " <<  engwijd   << "\n";
 
       // Is er op deze tel een nieuwe toonaard?
       if (i > 0 && i < tellen_size())
@@ -841,7 +875,7 @@ void Lied::parse_fu(const std::string line)
       std::cout << "   functie trap gevonden\n";
       
 
-      Functie *fun = new Functie(trap, romcijfer);
+      Functie *fun = new Functie(trap, romcijfer, kwartsixt, engwijd);
       tel->set_functie(fun);
       
       i++;
@@ -1018,13 +1052,17 @@ void Lied::for_each(std::function<void(Maat *, Tel *)> fu)
  */
 void Lied::maak_stemmen()
 {
-   for_each([this](Maat *m, Tel *t)
+   Tel    *vorige_tel     = nullptr;
+   Ligging vorige_ligging = lig_geen;
+   
+   for_each([this, &vorige_tel, &vorige_ligging](Maat *m, Tel *t)
    {
       std::cout << "   tel " << t->get_lengte() << "\n";
       ANoot *anoot = t->get_stem(0); // sop stem
 
       assert(anoot != nullptr);
 
+      /*
       // if enkel voor test
       if (anoot != nullptr && !anoot->is_rust())
       {
@@ -1035,11 +1073,24 @@ void Lied::maak_stemmen()
       {
          std::cout << "      geen noot of wel rust\n";
       }
+       */
       
       Functie *functie = t->get_functie();
       if (functie != nullptr)
       {
-         std::cout << "      functie " << functie->get_tekst() << "\n";
+         std::cout << "      functie " << functie->get_tekst() << " " 
+            << functie->get_kwartsixt() << " " 
+            << ew_to_s(functie->get_engwijd()) << "\n";
+
+         // Haal de ligging van deze functie
+         // en pas die eventueel aan   
+         Ligging ew = functie->get_engwijd();
+         if (ew == lig_geen)
+         {
+            // gebruik de laatst ingestelde eng of wijd
+            ew = vorige_ligging;
+         }
+         
          Trap *trap = functie->get_trap();
          
          assert(trap != nullptr);
@@ -1064,19 +1115,42 @@ void Lied::maak_stemmen()
                std::cout << "         in_akk\n";
 
                NootNaam *nn_sop = wijzer->get();
-               std::cout << "            sop " << nn_sop->get_naam() << "\n";
-
                wijzer->dec();
+               if (ew == lig_wijd)
+               {
+                  wijzer->dec();
+               }
                NootNaam *nn_alt = wijzer->get();
-               std::cout << "            alt " << nn_alt->get_naam() << "\n";
-
                wijzer->dec();
+               if (ew == lig_wijd)
+               {
+                  wijzer->dec();
+               }
                NootNaam *nn_ten = wijzer->get();
-               std::cout << "            ten " << nn_ten->get_naam() << "\n";
+               NootNaam *nn_bas = nullptr;
+               if (functie->get_kwartsixt() == "")
+               {
+                  nn_bas = akk->get(0); // Neem de basisnoot van het akkoord
+               }
+               else
+               if (functie->get_kwartsixt() == "6")
+               {
+                  nn_bas = akk->get(1); // Neem de terts van het akkoord
+               }
+               else
+               if (functie->get_kwartsixt() == "64")
+               {
+                  nn_bas = akk->get(2); // Neem de kwint van het akkoord
+               }
 
-               NootNaam *nn_bas = akk->get(0); // Neem de basisnoot van het akkoord
+               /* 
+               // toon de noten voordat ze onderalkaar staan
+               std::cout << "            sop " << nn_sop->get_naam() << "\n";
+               std::cout << "            alt " << nn_alt->get_naam() << "\n";
+               std::cout << "            ten " << nn_ten->get_naam() << "\n";
                std::cout << "            bas " << nn_bas->get_naam() << "\n";
-               
+                */
+
                // Maak de noten met behulp van de namen
                Noot *n_alt = akk->maak_noot(nn_alt, t->get_lengte());
                Noot *n_ten = akk->maak_noot(nn_ten, t->get_lengte());
@@ -1101,6 +1175,34 @@ void Lied::maak_stemmen()
                t->set_stem(1, n_alt);
                t->set_stem(2, n_ten);
                t->set_stem(3, n_bas);
+               
+               // Onthoud de ligging indien die expliciet voorkomt
+               // in deze functie
+               if (functie->get_engwijd() != lig_geen)
+               {
+                  vorige_ligging = functie->get_engwijd();
+               }
+               else
+               {
+                  // deze tel heeft geen ligging
+                  if (vorige_tel == nullptr)
+                  {
+                     // Dit is de eerste tel en die
+                     // specifieert een ligging
+                     // Ga verder met eng en geef een foutmelding.
+                     vorige_ligging = lig_eng;
+                     add_fout(new Fout(t->get_nr(), "Vermeld eng of wijd in de eerste noot"));
+                  }
+                  else
+                  if (vorige_tel->get_functie()->get_kwartsixt() == "6")
+                  {
+                     // Met een kwartsixt akkoord in de vorige tel 
+                     // moet deze tel ook een eng of wijd vermelding hebben.
+                     // Ga verder met eng en geef een foutmelding.
+                     vorige_ligging = lig_eng;
+                     add_fout(new Fout(t->get_nr(), "Vermeld eng of wijd na een 6 akkoord"));
+                  }
+               }
             }
             else
             {
@@ -1136,6 +1238,9 @@ void Lied::maak_stemmen()
                add_fout(new Fout(t->get_nr(), fout_tekst));
             }
          }
+         
+         // Onthoud de vorige tel
+         vorige_tel = t;
       }
       else
       {

@@ -462,18 +462,34 @@ public:
 
 
 // ---------- Functie ----------
+enum Ligging
+{
+   lig_geen = 0, 
+   lig_eng  = 1,
+   lig_wijd = 2
+};
 
 class Functie
 {
 private:
    Trap       *trap; // weak ptr
    std::string tekst;
+   std::string kwartsixt;
+   Ligging     engwijd;
    
 public:
-   Functie(Trap *trp, std::string tkst);   
+   Functie(Trap *trp, std::string tkst, std::string kwsxt, std::string ew);   
    ~Functie();
    Trap       *get_trap();
    std::string get_tekst();
+   std::string get_kwartsixt()
+   {
+      return kwartsixt;
+   }
+   Ligging get_engwijd()
+   {
+      return engwijd;
+   }
 };
 
 // ---------- Tel ----------
