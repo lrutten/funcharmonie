@@ -464,6 +464,11 @@ NootNaam *AkkoordWijzer::get()
    return akkoord->get(index);
 }
 
+int AkkoordWijzer::geti()
+{
+   return index;
+}
+
 void AkkoordWijzer::dec()
 {
    index--;

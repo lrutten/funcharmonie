@@ -210,6 +210,7 @@ public:
    AkkoordWijzer(Akkoord  *ak, int i);
    ~AkkoordWijzer();
    NootNaam *get();
+   int geti();
    void dec();
 };
 
@@ -464,9 +465,10 @@ public:
 // ---------- Functie ----------
 enum Ligging
 {
-   lig_geen = 0, 
-   lig_eng  = 1,
-   lig_wijd = 2
+   lig_geen  = 0, 
+   lig_eng   = 1,
+   lig_wijd  = 2,
+   lig_xwijd = 3
 };
 
 class Functie

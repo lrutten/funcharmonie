@@ -203,13 +203,14 @@ void Rust::print()
 
 constexpr std::string_view ew_to_s(Ligging ew)
 {
-    switch (ew)
-    {
-    case lig_geen: return "";
-    case lig_eng:  return "eng";
-    case lig_wijd: return "wijd";
-    default:       return "";
-    }
+   switch (ew)
+   {
+      case lig_geen:  return "geen";
+      case lig_eng:   return "eng";
+      case lig_wijd:  return "wijd";
+      case lig_xwijd: return "xwijd";
+      default:        return "";
+   }
 }
 
 // ----------  Functie ----------
@@ -225,6 +226,11 @@ Functie::Functie(Trap *trp, std::string tkst, std::string kwsxt, std::string ew)
    if (ew == "w")
    {
       engwijd = lig_wijd;
+   }
+   else
+   if (ew == "x")
+   {
+      engwijd = lig_xwijd;
    }
    else
    {
@@ -831,7 +837,7 @@ void Lied::parse_fu(const std::string line)
 
    // patroon voor de functies I, II, III, IV, V, VI en VII
    // nu ook met 64, 4, e en w
-   const std::regex toonaard(R"((?:^|\s+)((?:IV|III|II|I|VII|VI|V))((?:64|6)?)((?:e|w)?))");
+   const std::regex toonaard(R"((?:^|\s+)((?:IV|III|II|I|VII|VI|V))((?:64|6)?)((?:e|w|x)?))");
             
    // overloop alle toonaarden van een regel, dus multi-match
    unsigned long i = 0;
@@ -1110,23 +1116,94 @@ void Lied::maak_stemmen()
             bool in_akk = akk->bevat(n_sop->get_trap()->get_noot());
             if (in_akk)
             {
-               // Wijs de noot van de sopraan aan.
-               AkkoordWijzer *wijzer = akk->zoek(n_sop->get_trap()->get_noot());
                std::cout << "         in_akk\n";
 
+               // Wijs de noot van de sopraan aan.
+               AkkoordWijzer *wijzer = akk->zoek(n_sop->get_trap()->get_noot());
                NootNaam *nn_sop = wijzer->get();
-               wijzer->dec();
-               if (ew == lig_wijd)
+               NootNaam *nn_alt = nullptr;
+               NootNaam *nn_ten = nullptr;
+               
+               if (functie->get_kwartsixt() == "6")
                {
-                  wijzer->dec();
+                  int sop_index = wijzer->geti();
+                  constexpr int gr = 0;
+                  constexpr int te = 1;
+                  constexpr int kw = 2;
+                  
+                  if (sop_index == te)
+                  {
+                     // De sopraannoot is de terts van het 6 akkkoord.
+                     // Dit is verboden.
+                     add_fout(new Fout(t->get_nr(), "De sopraannoot mag niet de terts van het 6 sixtakkoord zingen"));
+                  }
+                  
+                  // Kies gr of kw voor alt en ten.
+                  if (sop_index == gr)
+                  {
+                     std::cout << "sop gr\n";
+                     switch (ew)
+                     {
+                        //case lig_geen:
+                        case lig_eng:
+                           std::cout << "   eng\n";
+                           nn_alt = akk->get(kw);
+                           nn_ten = akk->get(gr);
+                           break;
+                        case lig_wijd:
+                           std::cout << "   wijd\n";
+                           nn_alt = akk->get(gr);
+                           nn_ten = akk->get(kw);
+                           break;
+                        case lig_xwijd:
+                           std::cout << "   xwijd\n";
+                           nn_alt = akk->get(kw);
+                           nn_ten = akk->get(kw);
+                           break;
+                     }
+                  }
+                  else
+                  {
+                     std::cout << "sop kw\n";
+                     switch (ew)
+                     {
+                        //case lig_geen:
+                        case lig_eng:
+                           std::cout << "   eng\n";
+                           nn_alt = akk->get(gr);
+                           nn_ten = akk->get(kw);
+                           break;
+                        case lig_wijd:
+                           std::cout << "   wijd\n";
+                           nn_alt = akk->get(kw);
+                           nn_ten = akk->get(gr);
+                           break;
+                        case lig_xwijd:
+                           std::cout << "   xwijd\n";
+                           nn_alt = akk->get(gr);
+                           nn_ten = akk->get(gr);
+                           break;
+                     }
+                  }
                }
-               NootNaam *nn_alt = wijzer->get();
-               wijzer->dec();
-               if (ew == lig_wijd)
+               else
                {
+                  // Leg alt en ten vast voor basis 64 akkoorden
                   wijzer->dec();
+                  if (ew == lig_wijd)
+                  {
+                     wijzer->dec();
+                  }
+                  nn_alt = wijzer->get();
+                  wijzer->dec();
+                  if (ew == lig_wijd)
+                  {
+                     wijzer->dec();
+                  }
+                  nn_ten = wijzer->get();
                }
-               NootNaam *nn_ten = wijzer->get();
+
+               // Kies de bas volgens de omkering van het akkoord
                NootNaam *nn_bas = nullptr;
                if (functie->get_kwartsixt() == "")
                {
