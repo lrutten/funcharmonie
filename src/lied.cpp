@@ -366,8 +366,15 @@ nlohmann::json Tel::to_json()
    stemmen_js[3] = "r4";
     */
    tel_js["stemmen"] = stemmen_js;
-
    tel_js["nr"]      = nr;
+   if (functie != nullptr)
+   {
+      tel_js["functie"] = functie->get_tekst() + functie->get_kwartsixt();
+   }
+   else
+   {
+      tel_js["functie"] = "";
+   }
 
    int i = 0;
    for (Fout *f: fouten)
@@ -1123,19 +1130,24 @@ void Lied::maak_stemmen()
                NootNaam *nn_sop = wijzer->get();
                NootNaam *nn_alt = nullptr;
                NootNaam *nn_ten = nullptr;
-               
-               if (functie->get_kwartsixt() == "6")
+
+               // Is dit een basis sixt akkoord?               
+               if (functie->get_kwartsixt() == "6" && 
+                          (trap->get_naam() == "I"  ||
+                           trap->get_naam() == "IV" ||
+                           trap->get_naam() == "V"))
                {
                   int sop_index = wijzer->geti();
                   constexpr int gr = 0;
                   constexpr int te = 1;
                   constexpr int kw = 2;
                   
+                  // Hier mag de terts geen tweemaal voorkomen.
                   if (sop_index == te)
                   {
                      // De sopraannoot is de terts van het 6 akkkoord.
                      // Dit is verboden.
-                     add_fout(new Fout(t->get_nr(), "De sopraannoot mag niet de terts van het 6 sixtakkoord zingen"));
+                     add_fout(new Fout(t->get_nr(), "De sopraannoot mag de terts van het 6 sixtakkoord niet zingen"));
                   }
                   
                   // Kies gr of kw voor alt en ten.

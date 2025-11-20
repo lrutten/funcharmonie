@@ -44,6 +44,9 @@ muziek.midi: muziek.svg
 muziek.mp3: muziek.midi
 	~/bin/midi2mp3 muziek.midi
 
+muziek.pdf: muziek.ly
+	lilypond muziek.ly
+
 luister: muziek.mp3
 	mpv muziek.mp3
 

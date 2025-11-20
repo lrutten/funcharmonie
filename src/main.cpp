@@ -32,7 +32,7 @@ Main::~Main()
 
 void Main::open()
 {
-   Lied *lied = new Lied(harmonie, "vb1.hrm");
+   Lied *lied = new Lied(harmonie, "oef41.hrm");
 
    try
    {
