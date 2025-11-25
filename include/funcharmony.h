@@ -471,6 +471,8 @@ enum Ligging
    lig_xwijd = 3
 };
 
+const std::string_view ew_to_s(Ligging ew);
+
 class Functie
 {
 private:
@@ -589,9 +591,11 @@ public:
    static int s_to_lengte(std::string s);
    void print();
    nlohmann::json to_json();
-   void to_ly();
+   void to_ly(std::string fn);
    void add_fout(Fout *f);
    void for_each(std::function<void(Maat *, Tel *)> fu);
+   void vul_rusten(Tel *t);
+   void zet_stemmen_in_tel(Tel *t, Akkoord *akk, Noot *n_sop, NootNaam *nn_alt, NootNaam *nn_ten, NootNaam *nn_bas);
    void maak_stemmen();
 };
 

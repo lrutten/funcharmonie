@@ -1,0 +1,319 @@
+
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <map>
+#include <set>
+#include <algorithm>
+#include <regex>
+#include <cassert>
+
+#include "inja.hpp"
+#include "funcharmony.h"
+
+void Lied::vul_rusten(Tel *t)
+{
+   t->set_stem(1, new Rust(t->get_lengte()));
+   t->set_stem(2, new Rust(t->get_lengte()));
+   t->set_stem(3, new Rust(t->get_lengte()));
+}
+
+/**
+ * Maak de noten (Noot) voor alt, ten en bas.
+ * Plaats ze onder elkaar en vul in in de tel.
+ */ 
+void Lied::zet_stemmen_in_tel(Tel *t, Akkoord *akk, Noot *n_sop, NootNaam *nn_alt, NootNaam *nn_ten, NootNaam *nn_bas)
+{
+   // Maak de noten met behulp van de namen
+   Noot *n_alt = akk->maak_noot(nn_alt, t->get_lengte());
+   Noot *n_ten = akk->maak_noot(nn_ten, t->get_lengte());
+   Noot *n_bas = akk->maak_noot(nn_bas, t->get_lengte());
+
+   std::cout << "               noot sop " << n_sop->to_s() << "\n";
+   std::cout << "               noot alt " << n_alt->to_s() << "\n";
+   std::cout << "               noot ten " << n_ten->to_s() << "\n";
+   std::cout << "               noot bas " << n_bas->to_s() << "\n";
+               
+   // Schik de noten onder elkaar.
+   // Momenteel mogen de noten nog niet samenvallen
+   n_alt->onder(n_sop);
+   n_ten->onder(n_alt);
+   n_bas->onder(n_ten);
+
+   std::cout << "               noot sop " << n_sop->to_s() << "\n";
+   std::cout << "               noot alt " << n_alt->to_s() << "\n";
+   std::cout << "               noot ten " << n_ten->to_s() << "\n";
+   std::cout << "               noot bas " << n_bas->to_s() << "\n";
+               
+   // Vul de stemmen
+   t->set_stem(1, n_alt);
+   t->set_stem(2, n_ten);
+   t->set_stem(3, n_bas);
+}
+
+/*
+ * Maak de alt, ten en bas stemmen.
+ */
+void Lied::maak_stemmen()
+{
+   Tel    *vorige_tel     = nullptr;
+   Ligging vorige_ligging = lig_geen;
+   
+   for_each([this, &vorige_tel, &vorige_ligging](Maat *m, Tel *t)
+   {
+      std::cout << "   tel " << t->get_lengte() << "\n";
+      ANoot *anoot = t->get_stem(0); // sop stem
+
+      assert(anoot != nullptr);
+
+      /*
+      // if enkel voor test
+      if (anoot != nullptr && !anoot->is_rust())
+      {
+         // Elke noot die geen rust is, heeft een trap.
+         std::cout << "      noot " << anoot->get_trap()->get_naam() << "\n";
+      }
+      else
+      {
+         std::cout << "      geen noot of wel rust\n";
+      }
+       */
+      
+      Functie *functie = t->get_functie();
+      if (functie != nullptr)
+      {
+         std::cout << "      functie " << functie->get_tekst() << " " 
+            << functie->get_kwartsixt() << " " 
+            << ew_to_s(functie->get_engwijd()) << "\n";
+
+         // Haal de ligging van deze functie
+         // en pas die eventueel aan   
+         Ligging ew = functie->get_engwijd();
+         if (ew == lig_geen)
+         {
+            // gebruik de laatst ingestelde eng of wijd
+            ew = vorige_ligging;
+         }
+         
+         Trap *trap = functie->get_trap();
+         
+         assert(trap != nullptr);
+
+         if (trap != nullptr)
+         {
+            std::cout << "         trap " << trap->get_naam() << "\n";
+         }
+
+         // Gebruik voorlopig omkering 0
+         Akkoord *akk = trap->zoek_akkoord(0); // 0: basisligging
+         
+         
+         Noot *n_sop = dynamic_cast<Noot *>(anoot);
+         
+         // n_sop met een Noot zijn en geen Rust
+         // In de sopraanpartij kan geen rust ingegeven worden.
+         assert(n_sop != nullptr);
+
+         if (akk != nullptr)
+         {
+            // Er is een akkoord in de trap van deze functie.
+            bool in_akk = akk->bevat(n_sop->get_trap()->get_noot());
+            if (in_akk)
+            {
+               // Se sopraannoot komt voor in het akkoord.
+               std::cout << "         in_akk\n";
+
+               // Wijs de noot van de sopraan aan.
+               AkkoordWijzer *wijzer = akk->zoek(n_sop->get_trap()->get_noot());
+               NootNaam *nn_sop = wijzer->get();
+               NootNaam *nn_alt = nullptr;
+               NootNaam *nn_ten = nullptr;
+
+               // Is dit een sixt akkoord van de basistrappen I IV V?               
+               if (functie->get_kwartsixt() == "6" && 
+                          (trap->get_naam() == "I"  ||
+                           trap->get_naam() == "IV" ||
+                           trap->get_naam() == "V"))
+               {
+                  // Hier mag de terts niet verdubbeld worden.
+                  
+                  int sop_index = wijzer->geti();
+                  constexpr int gr = 0;
+                  constexpr int te = 1;
+                  constexpr int kw = 2;
+                  
+                  // Hier mag de terts geen tweemaal voorkomen.
+                  if (sop_index == te)
+                  {
+                     // De sopraannoot is de terts van het 6 akkkoord.
+                     // Dit is verboden.
+                     add_fout(new Fout(t->get_nr(), "De sopraannoot mag de terts van het 6 sixtakkoord niet zingen"));
+                  }
+                  
+                  // Kies gr of kw voor alt en ten.
+                  if (sop_index == gr)
+                  {
+                     std::cout << "sop gr\n";
+                     switch (ew)
+                     {
+                        //case lig_geen:
+                        case lig_eng:
+                           std::cout << "   eng\n";
+                           nn_alt = akk->get(kw);
+                           nn_ten = akk->get(gr);
+                           break;
+                        case lig_wijd:
+                           std::cout << "   wijd\n";
+                           nn_alt = akk->get(gr);
+                           nn_ten = akk->get(kw);
+                           break;
+                        case lig_xwijd:
+                           std::cout << "   xwijd\n";
+                           nn_alt = akk->get(kw);
+                           nn_ten = akk->get(kw);
+                           break;
+                     }
+                  }
+                  else
+                  {
+                     std::cout << "sop kw\n";
+                     switch (ew)
+                     {
+                        //case lig_geen:
+                        case lig_eng:
+                           std::cout << "   eng\n";
+                           nn_alt = akk->get(gr);
+                           nn_ten = akk->get(kw);
+                           break;
+                        case lig_wijd:
+                           std::cout << "   wijd\n";
+                           nn_alt = akk->get(kw);
+                           nn_ten = akk->get(gr);
+                           break;
+                        case lig_xwijd:
+                           std::cout << "   xwijd\n";
+                           nn_alt = akk->get(gr);
+                           nn_ten = akk->get(gr);
+                           break;
+                     }
+                  }
+               }
+               else
+               {
+                  // Leg alt en ten vast voor akkoorden in grondligging en 64 akkoorden
+                  // Omkering 0 en 1
+                  wijzer->dec();
+                  if (ew == lig_wijd)
+                  {
+                     // extra stap omlaag
+                     wijzer->dec();
+                  }
+                  nn_alt = wijzer->get();
+                  wijzer->dec();
+                  if (ew == lig_wijd)
+                  {
+                     // extra stap omlaag
+                     wijzer->dec();
+                  }
+                  nn_ten = wijzer->get();
+               }
+
+               // Kies de bas volgens de omkering van het akkoord
+               NootNaam *nn_bas = nullptr;
+               if (functie->get_kwartsixt() == "")
+               {
+                  nn_bas = akk->get(0); // Neem de basisnoot van het akkoord
+               }
+               else
+               if (functie->get_kwartsixt() == "6")
+               {
+                  nn_bas = akk->get(1); // Neem de terts van het akkoord
+               }
+               else
+               if (functie->get_kwartsixt() == "64")
+               {
+                  nn_bas = akk->get(2); // Neem de kwint van het akkoord
+               }
+
+               /* 
+               // toon de noten voordat ze onderalkaar staan
+               std::cout << "            sop " << nn_sop->get_naam() << "\n";
+               std::cout << "            alt " << nn_alt->get_naam() << "\n";
+               std::cout << "            ten " << nn_ten->get_naam() << "\n";
+               std::cout << "            bas " << nn_bas->get_naam() << "\n";
+                */
+
+               zet_stemmen_in_tel(t, akk, n_sop, nn_alt, nn_ten, nn_bas);
+               
+               
+               // Onthoud de ligging indien die expliciet voorkomt
+               // in deze functie
+               if (functie->get_engwijd() != lig_geen)
+               {
+                  vorige_ligging = functie->get_engwijd();
+               }
+               else
+               {
+                  // deze tel heeft geen ligging
+                  if (vorige_tel == nullptr)
+                  {
+                     // Dit is de eerste tel en die
+                     // specifieert een ligging
+                     // Ga verder met eng en geef een foutmelding.
+                     vorige_ligging = lig_eng;
+                     add_fout(new Fout(t->get_nr(), "Vermeld eng of wijd in de eerste noot"));
+                  }
+                  else
+                  if (vorige_tel->get_functie()->get_kwartsixt() == "6")
+                  {
+                     // Met een kwartsixt akkoord in de vorige tel 
+                     // moet deze tel ook een eng of wijd vermelding hebben.
+                     // Ga verder met eng en geef een foutmelding.
+                     vorige_ligging = lig_eng;
+                     add_fout(new Fout(t->get_nr(), "Vermeld eng of wijd na een 6 akkoord"));
+                  }
+               }
+            }
+            else
+            {
+               // De sopraan noot komt niet voor in het akkoord.
+               // Foutafhandeling komt hier.
+               
+               std::cout << "         !in_akk\n";
+               // Bij fout, plaats rusten in alt, ten en bas
+               vul_rusten(t);
+               
+               Toonaard *toonaard = n_sop->get_trap()->get_toonaard();
+               std::vector<Akkoord *> akkoorden = toonaard->lijst_pasakkoorden(n_sop->get_trap()->get_noot());
+               
+               // Maak een lijst van akkoorden die wel passen
+               //std::vector<Akkoord *> akkoorden = n_sop->get_trap()->lijst_pasakkoorden(n_sop->get_trap()->get_noot());
+
+               nlohmann::json lijst_js = nlohmann::json::array();
+               int k = 0;
+               for (Akkoord *akk: akkoorden)
+               {
+                  std::cout << "         wel akkoord " << akk->get_trap()->get_naam() << "\n";
+                  lijst_js[k] = akk->get_trap()->get_naam();
+                  k++;
+               }
+               nlohmann::json data;
+               data["akkoorden"] = lijst_js;
+               std::string fout_tekst = 
+                  inja::render("Functie past niet bij sopraan, wel {% for akk in akkoorden %}{{ akk }} {% endfor%}", data);
+               
+               add_fout(new Fout(t->get_nr(), fout_tekst));
+            }
+         }
+         
+         // Onthoud de vorige tel
+         vorige_tel = t;
+      }
+      else
+      {
+         std::cout << "      geen functie\n";
+         vul_rusten(t);
+      }
+   }); // for-each
+}
+

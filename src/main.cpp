@@ -16,7 +16,7 @@ private:
 public:
    Main();
    ~Main();
-   void open();
+   void open(std::string filenm);
    void print();
 };
 
@@ -30,9 +30,9 @@ Main::~Main()
    delete harmonie;
 }
 
-void Main::open()
+void Main::open(std::string filenm)
 {
-   Lied *lied = new Lied(harmonie, "oef41.hrm");
+   Lied *lied = new Lied(harmonie, filenm);
 
    try
    {
@@ -45,7 +45,8 @@ void Main::open()
    {
       std::cout << "Parser fout: " << fout.get_melding() << "\n";
    }
-   lied->to_ly();
+   std::string fn_noext = filenm.substr(0, filenm.rfind("."));
+   lied->to_ly(fn_noext + ".ly");
 
    delete lied;
 }
@@ -60,9 +61,15 @@ int main(int argc, char** argv)
    Main *mn = new Main();
    //mn->print();
    
-   // voorlopig geen lees lied
-   mn->open();
-
+   // lees lied
+   if (argc >= 2)
+   {
+      mn->open(argv[1]);
+   }
+   else
+   {
+      mn->open("oef41.hrm");
+   }
    delete mn;
 
    /*
