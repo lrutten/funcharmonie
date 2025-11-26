@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <regex>
 #include <cassert>
+#include <cctype>
 
 #include "inja.hpp"
 #include "funcharmony.h"
@@ -986,8 +987,54 @@ void Lied::parse_linetype(const std::string ltype, bool maak_noot)
    }
 }
 
+void Lied::parse_header()
+{
+   std::cout << "\n";
+   for (int i=0; i<file->size(); i++)
+   {
+      std::string line = file->get(i);
+      std::cout << "header lijn: " << line;
+      
+      const std::regex linetype(R"((K|T|M|Q):\s(.*)\n)");
+      std::smatch m;
+
+      if (regex_search(line, m, linetype))
+      {
+         std::string all    = m[0];
+         std::string letter = m[1];
+         std::string rest   = m[2];
+         std::cout << "   header all:  " << all << std::endl;
+         std::cout << "   header type: " << letter << std::endl;
+         std::cout << "   header rest: " << rest << std::endl;
+         
+         if (letter == "K")
+         {
+            toonaard = rest;
+         }
+         else
+         if (letter == "T")
+         {
+            titel = rest;
+         }
+         else
+         if (letter == "M")
+         {
+            metrum = rest;
+         }
+         else
+         if (letter == "Q")
+         {
+            tempo = rest;
+         }
+      }
+   }
+}
+
+
 void Lied::parse()
 {
+   parse_header();
+
    parse_linetype("v1", false);
    parse_linetype("ke", false);
    parse_linetype("v1", true);
@@ -1017,6 +1064,22 @@ nlohmann::json Lied::to_json()
 {
    nlohmann::json lied_js;
    nlohmann::json maten_js;
+   nlohmann::json header_js;
+   
+   // header
+   std::string ta_low ="";
+
+   // kleine letters voor lilypond
+   for(char c: toonaard)
+   {
+      ta_low += tolower(c);
+   }
+   header_js["titel"]    = titel;
+   header_js["metrum"]   = metrum;
+   header_js["tempo"]    = tempo;
+   header_js["toonaard"] = ta_low;
+   lied_js["header"]     = header_js;
+   
    for (Maat *m: maten)
    {
       maten_js.push_back(m->to_json());

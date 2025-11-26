@@ -48,6 +48,12 @@ void Main::open(std::string filenm)
    std::string fn_noext = filenm.substr(0, filenm.rfind("."));
    lied->to_ly(fn_noext + ".ly");
 
+   system("pwd");
+   std::string lily = "lilypond --svg -dresolution=600 -dcrop=#t " + fn_noext + ".ly";
+   system(lily.c_str());
+   std::string mv = "mv " + fn_noext + ".cropped.svg " + fn_noext + ".svg";
+   system(mv.c_str());
+
    delete lied;
 }
 

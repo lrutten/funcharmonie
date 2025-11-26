@@ -573,6 +573,10 @@ private:
    Textfile             *file;
    std::vector<Maat *>   maten;
    std::map<int, Fout *> fouten;
+   std::string           titel;
+   std::string           metrum;
+   std::string           tempo;
+   std::string           toonaard;
    
 public:
    Lied(Harmonie *hrm, const std::string fn);
@@ -584,6 +588,7 @@ public:
    void parse_test_v1();
    void parse();
    void parse_linetype(const std::string ltype, bool maak_noot);
+   void parse_header();
    void parse_v1(const std::string line, bool maak_noot);
    void parse_fu(const std::string line);
    void parse_ke(const std::string line);
