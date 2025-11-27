@@ -480,9 +480,10 @@ private:
    std::string tekst;
    std::string kwartsixt;
    Ligging     engwijd;
+   std::string plusmin;
    
 public:
-   Functie(Trap *trp, std::string tkst, std::string kwsxt, std::string ew);   
+   Functie(Trap *trp, std::string tkst, std::string kwsxt, std::string ew, std::string plmn);   
    ~Functie();
    Trap       *get_trap();
    std::string get_tekst();
@@ -493,6 +494,10 @@ public:
    Ligging get_engwijd()
    {
       return engwijd;
+   }
+   std::string get_plusmin()
+   {
+      return plusmin;
    }
 };
 
@@ -600,7 +605,7 @@ public:
    void add_fout(Fout *f);
    void for_each(std::function<void(Maat *, Tel *)> fu);
    void vul_rusten(Tel *t);
-   void zet_stemmen_in_tel(Tel *t, Akkoord *akk, Noot *n_sop, NootNaam *nn_alt, NootNaam *nn_ten, NootNaam *nn_bas);
+   void zet_stemmen_in_tel(Tel *t, Functie *fu, Akkoord *akk, Noot *n_sop, NootNaam *nn_alt, NootNaam *nn_ten, NootNaam *nn_bas);
    void maak_stemmen();
 };
 

@@ -22,7 +22,7 @@ void Lied::vul_rusten(Tel *t)
  * Maak de noten (Noot) voor alt, ten en bas.
  * Plaats ze onder elkaar en vul in in de tel.
  */ 
-void Lied::zet_stemmen_in_tel(Tel *t, Akkoord *akk, Noot *n_sop, NootNaam *nn_alt, NootNaam *nn_ten, NootNaam *nn_bas)
+void Lied::zet_stemmen_in_tel(Tel *t, Functie *fu, Akkoord *akk, Noot *n_sop, NootNaam *nn_alt, NootNaam *nn_ten, NootNaam *nn_bas)
 {
    // Maak de noten met behulp van de namen
    Noot *n_alt = akk->maak_noot(nn_alt, t->get_lengte());
@@ -44,7 +44,51 @@ void Lied::zet_stemmen_in_tel(Tel *t, Akkoord *akk, Noot *n_sop, NootNaam *nn_al
    std::cout << "               noot alt " << n_alt->to_s() << "\n";
    std::cout << "               noot ten " << n_ten->to_s() << "\n";
    std::cout << "               noot bas " << n_bas->to_s() << "\n";
-               
+
+   // Verplaats in octaven
+   std::string plmn = fu->get_plusmin();
+   if (plmn != "")
+   {
+      char pm_alt = ' ';
+      char pm_ten = ' ';
+      char pm_bas = ' ';
+      int len = plmn.size();
+
+      pm_bas = plmn[len - 1];
+      if (pm_bas == '+')
+      {
+         n_bas->verhoog();
+      }
+      if (pm_bas == '-')
+      {
+         n_bas->verlaag();
+      }
+      if (len >= 2)
+      {
+         pm_ten = plmn[len - 2];
+         if (pm_ten == '+')
+         {
+            n_ten->verhoog();
+         }
+         if (pm_ten == '-')
+         {
+            n_ten->verlaag();
+         }
+      }
+      if (len >= 3)
+      {
+         pm_alt = plmn[len - 0];
+         if (pm_alt == '+')
+         {
+            n_alt->verhoog();
+         }
+         if (pm_alt == '-')
+         {
+            n_alt->verlaag();
+         }
+      }
+   }
+   
    // Vul de stemmen
    t->set_stem(1, n_alt);
    t->set_stem(2, n_ten);
@@ -243,7 +287,7 @@ void Lied::maak_stemmen()
                std::cout << "            bas " << nn_bas->get_naam() << "\n";
                 */
 
-               zet_stemmen_in_tel(t, akk, n_sop, nn_alt, nn_ten, nn_bas);
+               zet_stemmen_in_tel(t, functie, akk, n_sop, nn_alt, nn_ten, nn_bas);
                
                
                // Onthoud de ligging indien die expliciet voorkomt

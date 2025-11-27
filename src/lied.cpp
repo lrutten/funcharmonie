@@ -216,8 +216,8 @@ const std::string_view ew_to_s(Ligging ew)
 
 // ----------  Functie ----------
 
-Functie::Functie(Trap *trp, std::string tkst, std::string kwsxt, std::string ew) : 
-   trap(trp), tekst(tkst), kwartsixt(kwsxt)
+Functie::Functie(Trap *trp, std::string tkst, std::string kwsxt, std::string ew, std::string plmn) : 
+   trap(trp), tekst(tkst), kwartsixt(kwsxt), plusmin(plmn)
 {
    if (ew == "e")
    {
@@ -845,7 +845,7 @@ void Lied::parse_fu(const std::string line)
 
    // patroon voor de functies I, II, III, IV, V, VI en VII
    // nu ook met 64, 4, e en w
-   const std::regex toonaard(R"((?:^|\s+)((?:IV|III|II|I|VII|VI|V))((?:64|6)?)((?:e|w|x)?))");
+   const std::regex toonaard(R"((?:^|\s+)((?:IV|III|II|I|VII|VI|V))((?:64|6)?)((?:e|w|x)?)((?:(?:\+|\-\=){0,3})))");
             
    // overloop alle toonaarden van een regel, dus multi-match
    unsigned long i = 0;
@@ -859,10 +859,12 @@ void Lied::parse_fu(const std::string line)
       std::string romcijfer = (*it)[1];
       std::string kwartsixt = (*it)[2];
       std::string engwijd   = (*it)[3];
+      std::string plusmin   = (*it)[4];
                
       std::cout << "romeins cijfer " <<  romcijfer << "\n";
       std::cout << "kwartsixt      " <<  kwartsixt << "\n";
       std::cout << "engwijd        " <<  engwijd   << "\n";
+      std::cout << "plusmin        " <<  plusmin   << "\n";
 
       // Is er op deze tel een nieuwe toonaard?
       if (i > 0 && i < tellen_size())
@@ -889,7 +891,7 @@ void Lied::parse_fu(const std::string line)
       std::cout << "   functie trap gevonden\n";
       
 
-      Functie *fun = new Functie(trap, romcijfer, kwartsixt, engwijd);
+      Functie *fun = new Functie(trap, romcijfer, kwartsixt, engwijd, plusmin);
       tel->set_functie(fun);
       
       i++;
