@@ -18,9 +18,12 @@ static const bool debug = false;
 std::map<std::string, std::set<std::string>>functies
 {
    // van    naar
-   { "I",  { "V", "IV" } },
-   { "V",  { "I" } },
-   { "IV", { "V", "I" } }
+   { "I",  { "V", "IV", "VI" } },
+   { "V",  { "I", "VI" } },
+                     // fout
+   { "IV", { "V", "I" , "VI"} },
+                  //fout fout
+   { "VI", { "IV" , "I", "V"} }
 };
 
 std::array<std::array<std::string, 2>, 4> stembereiken

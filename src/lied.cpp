@@ -845,7 +845,7 @@ void Lied::parse_fu(const std::string line)
 
    // patroon voor de functies I, II, III, IV, V, VI en VII
    // nu ook met 64, 4, e en w
-   const std::regex toonaard(R"((?:^|\s+)((?:IV|III|II|I|VII|VI|V))((?:64|6)?)((?:e|w|x)?)((?:(?:\+|\-\=){0,3})))");
+   const std::regex toonaard(R"((?:^|\s+)((?:IV|III|II|I|VII|VI|V))((?:64|6)?)((?:e|w|x)?)((?:(?:\+|\-|\=){0,3})))");
             
    // overloop alle toonaarden van een regel, dus multi-match
    unsigned long i = 0;

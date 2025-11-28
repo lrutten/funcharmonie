@@ -123,7 +123,42 @@ void Lied::maak_stemmen()
       }
        */
       
+      bool verbinding_mag = true;
       Functie *functie = t->get_functie();
+      std::string tel_naam;
+      std::string vtel_naam;
+      if (vorige_tel != nullptr)
+      {
+         Functie *vorige_functie = vorige_tel->get_functie();
+         if (functie != nullptr && vorige_functie != nullptr)
+         {
+            tel_naam  = functie->get_trap()->get_naam();
+            vtel_naam = vorige_functie->get_trap()->get_naam();
+            std::cout << "      verbinding " << vtel_naam << "-" << tel_naam << "\n"; 
+            
+            std::set<std::string> naar = functies[vtel_naam];
+            if (tel_naam != vtel_naam && !naar.contains(tel_naam))
+            {
+               verbinding_mag = false;
+            }
+         }
+      }
+      
+      if (!verbinding_mag)
+      {
+         // deze verbinding is niet toegestaan
+         
+         nlohmann::json data;
+         data["fu1"] = vtel_naam;
+         data["fu2"] = tel_naam;
+         std::string fout_tekst = 
+         inja::render("De verbinding {{ fu1 }}-{{ fu2 }} is verboden", data);
+         add_fout(new Fout(t->get_nr(), fout_tekst));
+         
+         add_fout(new Fout(t->get_nr(), "Deze verbinding is verboden"));
+         vul_rusten(t);         
+      }
+      else
       if (functie != nullptr)
       {
          std::cout << "      functie " << functie->get_tekst() << " " 

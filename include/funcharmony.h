@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <array>
+#include <set>
 #include <functional>
 
 #include "inja.hpp"
@@ -14,6 +15,8 @@ constexpr int aantal_diat_noten  = 7;
 
 constexpr int midi_laag = 21;   // laagste midicode A0
 constexpr int midi_hoog = 127;  // hoogste midicode G8
+
+extern std::map<std::string, std::set<std::string>>functies;
 
 // ---------- ParserError ----------
 
