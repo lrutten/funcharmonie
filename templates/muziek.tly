@@ -1,0 +1,121 @@
+\version "2.24.4"
+
+\include "roman_numeral_analysis_tool.ily"
+
+\pointAndClickOff
+
+\header
+{
+   title =  "{{ lied.header.titel }}"
+}
+
+\layout
+{
+   \context 
+   { 
+      \Score
+      skipBars = ##t
+   }
+}
+
+global =
+{
+   \time {{ lied.header.metrum }} \key {{ lied.header.toonaard }} \major
+}
+
+VoiceOne =
+{
+   \override Score.BarNumber.break-visibility = #end-of-line-invisible
+   \set Score.currentBarNumber = 1
+   % Print a bar number every second measure
+   \set Score.barNumberVisibility = #(every-nth-bar-number-visible 1)
+
+   \clef "treble"
+   \global
+   {% for maat in lied.maten %}{% for tel in maat%}{{ at(tel.stemmen, 0) }} {% endfor %} |
+   {% endfor %}
+}
+
+VoiceTwo =
+{
+   \clef "treble" 
+   \global
+   {% for maat in lied.maten %}{% for tel in maat%}{{ at(tel.stemmen, 1) }}_{{ tel.nr }} {% endfor %} |
+   {% endfor %}
+}
+
+VoiceThree =
+{
+   \clef "bass"
+   \global 
+   {% for maat in lied.maten %}{% for tel in maat%}{{ at(tel.stemmen, 2) }} {% endfor %} |
+   {% endfor %}
+}
+
+VoiceFour =
+{
+   \clef "bass"
+   \global
+   {% for maat in lied.maten %}{% for tel in maat%}{{ at(tel.stemmen, 3) }} {% endfor %} |
+   {% endfor %}
+}
+
+analysis = \lyricmode
+{
+   %\override LyricText.self-alignment-X = #-0.6
+   %\offset StanzaNumber.X-offset #-3
+   %\set stanza  = #"G:"
+
+   % For bare Roman numerals, \rN simply outputs the string.
+   %\markup \rN { I }
+   %\markup \rN { I }
+   %\markup \rN { V }
+   %\markup \rN { I }
+
+   {% for maat in lied.maten %}{% for tel in maat%}\markup \rN { {{ tel.functie }} } 
+   {% endfor %}
+   {% endfor %}
+}
+
+
+% The score definition
+\score
+{
+   <<
+      \new ChoirStaff
+      <<
+         \context Staff = "1"
+         << 
+            \mergeDifferentlyDottedOn\mergeDifferentlyHeadedOn
+            \context Voice = "VoiceOne" {  \voiceOne \VoiceOne }
+            \context Voice = "VoiceTwo" {  \voiceTwo \VoiceTwo }
+         >>
+         \context Staff = "2" 
+         <<
+            \mergeDifferentlyDottedOn\mergeDifferentlyHeadedOn
+            \context Voice = "VoiceThree" {  \voiceOne \VoiceThree }
+            \context Voice = "VoiceFour"  {  \voiceTwo \VoiceFour }
+            \context Lyrics \lyricsto "VoiceFour" { \analysis  }
+         >>
+      >>
+        
+   >>
+   \layout {}
+   % To create MIDI output, uncomment the following line:
+   \midi {\tempo {{ lied.header.tempo }} }
+}
+
+\markuplist {
+  \fill-line {
+    \column \italic {
+      \vspace #1
+      % \line { Tel 1: de toonaard ontbreekt. }
+      % \line { Tel 2: deze noot past niet in de toonaard. } 
+      % \line { Tel 3: Deze noot past niet in het akkoord. }
+      {% for fout in lied.fouten %}\line { Noot {{ fout.nr }}: {{ fout.tekst }} }{% endfor %}
+    }
+    \column {
+    }
+  }
+}
+
