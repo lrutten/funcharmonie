@@ -314,10 +314,11 @@ class Toonaard
 private:
    std::string naam;
    int         richting; // 1 is kruis, -1 is bemol
+   bool        minor;    // is dit in mineur?
    Toonladder *toonladder;
 
 public:
-   Toonaard(std::string nm, int ri);
+   Toonaard(std::string nm, int ri, bool mnr = false);
    ~Toonaard();
    std::string get_naam();
    NootNaam *get(int k);

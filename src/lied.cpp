@@ -1072,14 +1072,25 @@ nlohmann::json Lied::to_json()
    std::string ta_low ="";
 
    // kleine letters voor lilypond
-   for(char c: toonaard)
+   // en zonder m
+   bool mnr = false;
+   for (char c: toonaard)
    {
-      ta_low += tolower(c);
+      char cc = tolower(c);
+      if (cc != 'm')
+      {
+         ta_low += tolower(c);
+      }
+      else
+      {
+         mnr = true;
+      }
    }
    header_js["titel"]    = titel;
    header_js["metrum"]   = metrum;
    header_js["tempo"]    = tempo;
    header_js["toonaard"] = ta_low;
+   header_js["minor"]    = mnr;
    lied_js["header"]     = header_js;
    
    for (Maat *m: maten)

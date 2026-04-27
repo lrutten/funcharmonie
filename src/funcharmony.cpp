@@ -911,7 +911,7 @@ void Toonladder::print()
 
 // ---------- Toonaard ----------
 
-Toonaard::Toonaard(std::string nm, int ri) : naam(nm), richting(ri)
+Toonaard::Toonaard(std::string nm, int ri, bool mnr) : naam(nm), richting(ri), minor(mnr)
 {
    toonladder = new Toonladder();
 }
@@ -942,9 +942,22 @@ int Toonaard::inc(int j)
    return j;
 }
 
+/*
+ *       I II III IV V VI VII I
+ * major  2  2   1  2 2  2   1
+ * minor  2  1   2  2 1  3   1
+ * 
+ * 
+ * 
+ */ 
 void Toonaard::maak_trappen(Toetsen *tt)
 {
    std::string nm = to_lower(naam);
+   if (minor)
+   {
+      // verwijder de m op het einde
+      nm.pop_back();
+   }
    if (debug) std::cout << naam << " " << nm << "\n";
    ToetsWijzer *wzr = tt->zoek_noot_tw(nm);
    if (wzr != nullptr)
@@ -958,14 +971,29 @@ void Toonaard::maak_trappen(Toetsen *tt)
       NootNaam *nn2 = wzr->get(richting);
       if (debug) std::cout << "      noot 2 " << nn2->get_naam() << "\n";
       toonladder->add_trap(new Trap("II", 1, this, nn2));
-         
-      wzr->inc();
-      wzr->inc();
+      
+      if (minor)
+      {
+         wzr->inc();
+      }
+      else
+      {
+         wzr->inc();
+         wzr->inc();
+      }
       NootNaam *nn3 = wzr->get(richting);
       if (debug) std::cout << "      noot 3 " << nn3->get_naam() << "\n";
       toonladder->add_trap(new Trap("III", 2, this, nn3));
-         
-      wzr->inc();
+      
+      if (minor)
+      {
+         wzr->inc();
+         wzr->inc();
+      }
+      else
+      {
+         wzr->inc();
+      }
       NootNaam *nn4 = wzr->get(richting);
       if (debug) std::cout << "      noot 4 " << nn4->get_naam() << "\n";
       toonladder->add_trap(new Trap("IV", 3, this, nn4));
@@ -975,15 +1003,31 @@ void Toonaard::maak_trappen(Toetsen *tt)
       NootNaam *nn5 = wzr->get(richting);
       if (debug) std::cout << "      noot 5 " << nn5->get_naam() << "\n";
       toonladder->add_trap(new Trap("V", 4, this, nn5));
-         
-      wzr->inc();
-      wzr->inc();
+      
+      if (minor)
+      {
+         wzr->inc();
+      }
+      else
+      {
+         wzr->inc();
+         wzr->inc();
+      }
       NootNaam *nn6 = wzr->get(richting);
       if (debug) std::cout << "      noot 6 " << nn6->get_naam() << "\n";
       toonladder->add_trap(new Trap("VI", 5, this, nn6));
-         
-      wzr->inc();
-      wzr->inc();
+      
+      if (minor)
+      {
+         wzr->inc();
+         wzr->inc();
+         wzr->inc();
+      }
+      else
+      {
+         wzr->inc();
+         wzr->inc();
+      }
       NootNaam *nn7 = wzr->get(richting);
       if (debug) std::cout << "      noot 7 " << nn7->get_naam() << "\n";
       toonladder->add_trap(new Trap("VII", 6, this, nn7));
@@ -1045,6 +1089,20 @@ Toonaarden::Toonaarden()
    toonaarden.push_back(new Toonaard("As",  -1)); // Gis
    toonaarden.push_back(new Toonaard("Des", -1)); // Cis
    toonaarden.push_back(new Toonaard("Ges", -1)); // Fis
+
+   toonaarden.push_back(new Toonaard("Am",   1, true)); // C
+   toonaarden.push_back(new Toonaard("Em",   1, true)); // D
+   toonaarden.push_back(new Toonaard("Bm",   1, true)); // A
+   toonaarden.push_back(new Toonaard("Fism", 1, true)); // E
+   toonaarden.push_back(new Toonaard("Cism", 1, true)); // B
+   toonaarden.push_back(new Toonaard("Gism", 1, true)); // Fis
+
+   toonaarden.push_back(new Toonaard("Dm",   1, true)); // F
+   toonaarden.push_back(new Toonaard("Gm",   1, true)); // Bes
+   toonaarden.push_back(new Toonaard("Cm",   1, true)); // Es
+   toonaarden.push_back(new Toonaard("Fm",   1, true)); // As
+   toonaarden.push_back(new Toonaard("Besm", 1, true)); // Des
+   toonaarden.push_back(new Toonaard("Esm",  1, true)); // Ges
 }
 
 Toonaarden::~Toonaarden()

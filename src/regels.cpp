@@ -280,7 +280,7 @@ void Lied::maak_stemmen()
                else
                {
                   // Leg alt en ten vast voor akkoorden in grondligging en 64 akkoorden
-                  // Omkering 0 en 1
+                  // Omkering 0 en 1, dus bv I en I64
                   wijzer->dec();
                   if (ew == lig_wijd)
                   {
@@ -297,7 +297,10 @@ void Lied::maak_stemmen()
                   nn_ten = wijzer->get();
                }
 
-               // Kies de bas volgens de omkering van het akkoord
+               // De bovenstaande code heeft de alt en ten stemmen bepaald
+               // volgens de omkering I, I6 of I64. Nu nog de bas.
+
+               // Kies de bas volgens de omkering van het akkoord.
                NootNaam *nn_bas = nullptr;
                if (functie->get_kwartsixt() == "")
                {
