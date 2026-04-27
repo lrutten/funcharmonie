@@ -1,0 +1,223 @@
+@startuml
+
+class ParserError {
+   String melding
+}
+
+class NootNaam {
+   String naam
+   Int64         midi 
+}
+
+class NootNamen {
+   NootNaam[] nootnamen
+}
+
+NootNamen "1" --> "n" NootNaam : nootnamen >
+
+abstract class Toets {
+}
+
+class Wit {
+   NootNaam? nootnaam
+}
+
+Wit "1" --> "1" NootNaam : nootnaam >
+
+Toets <|-- Wit
+
+class Zwart {
+   NootNaam? nootnaam_laag
+   NootNaam? nootnaam_hoog
+}
+
+Zwart "1" --> "1" NootNaam : nootnaam_laag >
+Zwart "1" --> "1" NootNaam : nootnaam_hoog >
+
+Toets <|-- Zwart
+
+class ToetsWijzer {
+   Toetsen? toetsen
+   Int64      index
+}
+
+ToetsWijzer "1" --> "1" Toetsen : toetsen >
+
+class Toetsen {
+   Toets[] toetsen
+}
+
+Toetsen "1" --> "1" Toets : toetsen >
+
+class StemBereik {
+   Noot? laag
+   Noot? hoog
+}
+
+StemBereik "1" --> "1" Noot : laag >
+StemBereik "1" --> "1" Noot : hoog >
+
+class StemBereiken {
+   StemBereik[] bereiken
+}
+
+StemBereiken "1" --> "n" StemBereik : bereiken >
+
+class AkkoordNoot {
+   Akkoord ? akkoord
+   NootNaam? noot
+   Int64       rol   
+   Int64       stap  
+}
+
+AkkoordNoot "1" --> "1" Akkoord : akkoord >
+AkkoordNoot "1" --> "1" NootNaam : noot >
+
+
+class AkkoordWijzer {
+   Akkoord? akkoord
+   Int64      index
+}
+
+AkkoordWijzer "1" --> "1" Akkoord : akkoord >
+
+
+class Akkoord {
+   Trap? trap
+   Int64 omkering 
+   AkkoordNoot? g 
+   AkkoordNoot? t 
+   AkkoordNoot? k 
+}
+
+Akkoord "1" --> "1" Trap : trap >
+Akkoord "1" --> "1" AkkoordNoot : g >
+Akkoord "1" --> "1" AkkoordNoot : t >
+Akkoord "1" --> "1" AkkoordNoot : k >
+
+class Trap {
+   String naam 
+   Int64         stap 
+   Toonaard? toonaard
+   NootNaam? noot
+   Akkoord[] akkoorden
+}
+
+Trap "1" --> "1" Toonaard : toonaard >
+Trap "1" --> "1" NootNaam : noot >
+
+class Toonladder {
+   Trap[] trappen
+}
+
+Toonladder "1" --> "n" Trap : trappen >
+
+class Toonaard {
+   String naam
+   Int64         richting 
+   Toonladder? toonladder
+}
+
+Toonaard "1" --> "1" Toonladder : toonladder >
+
+class Toonaarden {
+   Toonaard[] toonaarden
+}
+
+Toonaarden "1" --> "n" Toonaard : toonaarden >
+
+class Harmonie {
+   Toetsen     ? toetsen
+   Toonaarden  ? toonaarden
+   StemBereiken? bereiken
+}
+
+Harmonie "1" --> "1" Toetsen : toetsen >
+Harmonie "1" --> "1" Toonaarden : toonaarden >
+Harmonie "1" --> "1" StemBereiken : bereiken >
+
+class Fout {
+   Int64 nr
+   String tekst   
+}
+
+class ANoot {
+   Int64         lengte 
+}
+
+class Noot {
+   Trap      ? trap 
+   Int64         octaaf 
+   String gelezen_tekst 
+   Int64         midi  
+}
+
+Noot "1" --> "1" Trap : trap >
+
+ANoot <|-- Noot
+
+class Rust {
+}
+
+ANoot <|-- Rust
+
+enum Ligging {
+   lig_geen  = 0, 
+   lig_eng   = 1,
+   lig_wijd  = 2,
+   lig_xwijd = 3
+}
+
+
+class Functie {
+   Trap? trap 
+   String tekst
+   String kwartsixt
+   Ligging     engwijd
+   String plusmin
+   
+}
+
+Functie "1" --> "1" Trap : trap >
+
+class Tel {
+   static Int64            teller
+   Int64                   nr
+   Int64                   lengte  
+   ANoot[] stemmen
+   Functie? functie
+   Toonaard? toonaard
+   Fout[]   fouten
+}
+
+Tel "1" --> "n" ANoot : stemmen >
+Tel "1" --> "n" Fout : fouten >
+
+Tel "1" --> "1" Functie : functie >
+Tel "1" --> "1" Toonaard : toonaard >
+
+class Maat {
+   Tel[] > tellen
+
+}
+
+Maat "1" --> "n" Tel : tellen >
+
+class Lied {
+   Harmonie? harmonie
+   Textfile? file
+   Maat[]   maten
+   Fout[] fouten
+   String           titel
+   String           metrum
+   String           tempo
+   String           toonaard
+}
+
+Lied "1" --> "n" Maat : maten >
+Lied "1" --> "n" Fout : fouten >
+
+Lied "1" --> "1" Harmonie : harmonie >
+
+@enduml
+

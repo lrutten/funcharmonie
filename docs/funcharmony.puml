@@ -1,0 +1,444 @@
+@startuml
+
+class ParserError {
+   String melding
+
+   ParserError()
+   String get_melding() const
+}
+
+class NootNaam {
+   String naam
+   Int64         midi 
+
+   NootNaam()
+   ~NootNaam()
+   String get_naam()
+   Int64 get_midi()
+   void print()
+}
+
+class NootNamen {
+   NootNaam[] nootnamen
+
+   NootNamen()
+   ~NootNamen()
+}
+
+NootNamen "1" --> "n" NootNaam : nootnamen >
+
+abstract class Toets {
+   ~Toets()
+   void print()
+   bool heeft_naam()
+   NootNaam? get()            
+   NootNaam? get_nn() 
+}
+
+class Wit {
+   NootNaam? nootnaam
+
+   Wit()
+   ~Wit()
+   bool heeft_naam()
+   NootNaam? get()
+   NootNaam? get_nn()
+   void print()
+}
+
+Wit "1" --> "1" NootNaam : nootnaam >
+
+Toets <|-- Wit
+
+class Zwart {
+   NootNaam? nootnaam_laag
+   NootNaam? nootnaam_hoog
+
+   Zwart()
+   ~Zwart()
+   NootNaam? laag()
+   NootNaam? hoog()
+
+   bool heeft_naam()
+   NootNaam? get()
+   NootNaam? get_nn()
+   void print()
+}
+
+Zwart "1" --> "1" NootNaam : nootnaam_laag >
+Zwart "1" --> "1" NootNaam : nootnaam_hoog >
+
+Toets <|-- Zwart
+
+class ToetsWijzer {
+   Toetsen? toetsen
+   Int64      index
+
+   ToetsWijzer()
+   ~ToetsWijzer()
+   NootNaam? get()
+   void inc()
+}
+
+ToetsWijzer "1" --> "1" Toetsen : toetsen >
+
+class Toetsen {
+   Toets[] toetsen
+
+   Toetsen()
+   ~Toetsen()
+   Toets? get()
+   ToetsWijzer? zoek_noot_tw()
+   NootNaam? zoek_noot()
+   void print()
+}
+
+Toetsen "1" --> "1" Toets : toetsen >
+
+class StemBereik {
+   Noot? laag
+   Noot? hoog
+   
+
+   StemBereik()
+   ~StemBereik()
+}
+
+StemBereik "1" --> "1" Noot : laag >
+StemBereik "1" --> "1" Noot : hoog >
+
+class StemBereiken
+{
+   StemBereik[] bereiken
+
+   StemBereiken()
+   ~StemBereiken()
+   void maak_bereiken()
+}
+
+Stembereiken "1" --> "n" Stembereik : bereiken >
+
+class AkkoordNoot {
+   Akkoord ? akkoord
+   NootNaam? noot
+   Int64       rol   
+   Int64       stap  
+                    
+
+   AkkoordNoot()
+   ~AkkoordNoot()
+   void set_akkoord()
+   String get_naam()
+   Int64 get_stap() const
+   NootNaam? get_noot()
+}
+
+AkkoordNoot "1" --> "1" Akkoord : akkoord >
+AkkoordNoot "1" --> "1" NootNaam : noot >
+
+
+class AkkoordWijzer {
+   Akkoord? akkoord
+   Int64      index
+
+   AkkoordWijzer()
+   ~AkkoordWijzer()
+   NootNaam? get()
+   Int64 geti()
+   void dec()
+}
+
+AkkoordWijzer "1" --> "1" Akkoord : akkoord >
+
+
+class Akkoord {
+   Trap? trap
+   Int64 omkering 
+   AkkoordNoot? g 
+   AkkoordNoot? t 
+   AkkoordNoot? k 
+
+   Akkoord()
+   ~Akkoord()
+   Int64 get_omkering()
+   Trap? get_trap()
+   bool bevat()
+   Int64 get_basisnoot_rang() const
+   NootNaam? get()
+   AkkoordWijzer? zoek()
+   Noot? maak_noot()
+   void print()
+}
+
+Akkoord "1" --> "1" Trap : trap >
+Akkoord "1" --> "1" AkkoordNoot : g >
+Akkoord "1" --> "1" AkkoordNoot : t >
+Akkoord "1" --> "1" AkkoordNoot : k >
+
+class Trap {
+   String naam 
+   Int64         stap 
+   Toonaard? toonaard
+   NootNaam? noot
+   Akkoord[] akkoorden
+
+   Trap()
+   ~Trap()
+   String get_naam()
+   Int64 get_stap()
+   Toonaard? get_toonaard()
+   Akkoord? get_basisakkoord()
+   NootNaam? get_noot()
+   void add_akkoord()
+   void maak_akkoorden()
+   Akkoord? zoek_akkoord()
+   void iterate()
+   void print()
+}
+
+Trap "1" --> "1" Toonaard : toonaard >
+Trap "1" --> "1" NootNaam : noot >
+
+class Toonladder {
+   Trap[] trappen
+
+   Toonladder()
+   ~Toonladder()
+   Trap? get()
+   void add_trap()
+   void maak_akkoorden()
+   static const bool lang = false
+   Trap? zoek_noot()
+   Trap? zoek_functie()
+   Trap? zoek_trap()
+   Akkoord[] lijst_pasakkoorden()
+   void print()
+}
+
+Toonladder "1" --> "n" Trap : trappen >
+
+class Toonaard {
+   String naam
+   Int64         richting 
+   Toonladder? toonladder
+
+   Toonaard()
+   ~Toonaard()
+   String get_naam()
+   NootNaam? get()
+   Int64 inc()
+   void maak_trappen()
+   Trap? zoek_noot()
+   Trap? zoek_functie()
+   Trap? zoek_trap()
+   Akkoord[] lijst_pasakkoorden()
+   void print()
+}
+
+Toonaard "1" --> "1" Toonladder : toonladder >
+
+class Toonaarden {
+   Toonaard[] toonaarden
+
+   Toonaarden()
+   ~Toonaarden()
+   void maak_trappen()
+   Toonaard? zoek()
+   Trap? zoek_trap()
+   void print()
+}
+
+Toonaarden "1" --> "n" Toonaard : toonaarden >
+
+class Harmonie {
+   Toetsen     ? toetsen
+   Toonaarden  ? toonaarden
+   StemBereiken? bereiken
+
+   Harmonie()   
+   ~Harmonie()
+   Toetsen? get_toetsen()
+   Toonaard? zoek_toonaard()
+   Trap? zoek_trap()
+   void print()
+}
+
+Harmonie "1" --> "1" Toetsen : toetsen >
+Harmonie "1" --> "1" Toonaarden : toonaarden >
+Harmonie "1" --> "1" StemBereiken : bereiken >
+
+class Fout {
+   Int64 nr
+   String tekst   
+
+   Fout()
+   ~Fout()
+   Int64 get_nr()
+   String get_tekst()
+   void print()
+}
+
+class ANoot {
+   Int64         lengte 
+
+   ANoot()
+   ~ANoot()
+   Int64 get_lengte()
+   bool is_rust()
+   Trap? get_trap()
+   String to_s()
+   void print()
+}
+
+class Noot {
+   Trap      ? trap 
+   Int64         octaaf 
+   String gelezen_tekst 
+   Int64         midi  
+
+   Noot()
+   ~Noot()
+   bool is_rust()
+   Trap? get_trap()
+   Int64 get_octaaf()
+   Int64 get_lengte()
+   Int64 get_midi()
+   void set_midi()
+   void onder()
+   bool operator<()
+   void verlaag()
+   void verhoog()
+   String to_s()
+   void print()
+}
+
+Noot "1" --> "1" Trap : trap >
+
+ANoot <|-- Noot
+
+class Rust {
+   Rust()
+   ~Rust()
+   bool is_rust()
+   Trap? get_trap()
+   String to_s()
+   void print()
+}
+
+ANoot <|-- Rust
+
+enum Ligging {
+   lig_geen  = 0, 
+   lig_eng   = 1,
+   lig_wijd  = 2,
+   lig_xwijd = 3
+}
+
+
+class Functie {
+   Trap? trap 
+   String tekst
+   String kwartsixt
+   Ligging     engwijd
+   String plusmin
+   
+
+   Functie()   
+   ~Functie()
+   Trap? get_trap()
+   String get_tekst()
+   String get_kwartsixt()
+   Ligging get_engwijd()
+   String get_plusmin()
+}
+
+Functie "1" --> "1" Trap : trap >
+
+class Tel {
+   static Int64            teller
+   Int64                   nr
+   Int64                   lengte  
+   ANoot[] stemmen
+   Functie? functie
+   Toonaard? toonaard
+   Fout[]   fouten
+
+
+   Tel()
+   ~Tel()
+   Toonaard? get_toonaard()
+   void  set_toonaard()
+   ANoot? get_stem()
+   void  set_stem()
+   Functie? get_functie()
+   void set_functie()
+   Int64 get_nr()
+   Int64 get_lengte()
+   void set_lengte()
+   void print()
+   json to_json()
+}
+
+Tel "1" --> "n" ANoot : stemmen >
+Tel "1" --> "n" Fout : fouten >
+
+Tel "1" --> "1" Functie : functie >
+Tel "1" --> "1" Toonaard : toonaard >
+
+class Maat {
+   Tel[] > tellen
+
+   Maat()
+   ~Maat()
+   Int64 size()
+   void add()
+   Tel? get()
+   void print()
+   json to_json()
+   void for_each()   
+}
+
+Maat "1" --> "n" Tel : tellen >
+
+class Lied {
+   Harmonie? harmonie
+   Textfile? file
+   Maat[]   maten
+   Fout[] fouten
+   String           titel
+   String           metrum
+   String           tempo
+   String           toonaard
+   
+   Lied()
+   ~Lied()
+   Int64 tellen_size()
+   Tel? get_tel()
+   void nieuwe_maat()
+
+   void parse_test_v1()
+   void parse()
+   void parse_linetype()
+   void parse_header()
+   void parse_v1()
+   void parse_fu()
+   void parse_ke()
+   static Int64 s_to_octaaf()
+   static Int64 s_to_lengte()
+   void print()
+   json to_json()
+   void to_ly()
+   void add_fout()
+   void for_each()
+   void vul_rusten()
+   void zet_stemmen_in_tel()
+   void maak_stemmen()
+}
+
+Lied "1" --> "n" Maat : maten >
+Lied "1" --> "n" Fout : fouten >
+
+Lied "1" --> "1" Harmonie : harmonie >
+
+@enduml
+
