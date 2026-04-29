@@ -7,6 +7,15 @@
 #include "funcharmony.h"
 #include "mainwindow.h"  // NOLINT(build/include_subdir) INCLUDE_NO_DIR
 
+/*
+ * Steps
+ *    1 read file
+ *    2 parse file
+ *    3 make voices
+ *    4 write .ly
+ *    5 execute lilypond
+ */ 
+constexpr int steps = 2;
 
 class Main
 {
@@ -34,10 +43,26 @@ void Main::open(std::string filenm)
 {
    Lied *lied = new Lied(harmonie, filenm);
 
+   if (steps <= 1)
+   {
+      std::cout << "steps 1\n";
+
+      delete lied;
+      return;
+   }
+   
    try
    {
       lied->parse();
       lied->print();
+      
+      if (steps <= 2)
+      {
+         std::cout << "steps 2\n";
+
+         delete lied;
+         return;
+      }
       lied->maak_stemmen();
       //lied->to_ly();
    }
@@ -65,7 +90,7 @@ void Main::print()
 int main(int argc, char** argv)
 {
    Main *mn = new Main();
-   //mn->print();
+   mn->print();
    
    // lees lied
    if (argc >= 2)
