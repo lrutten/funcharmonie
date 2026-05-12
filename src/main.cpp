@@ -15,7 +15,7 @@
  *    4 write .ly
  *    5 execute lilypond
  */ 
-constexpr int steps = 2;
+constexpr int steps = 5;
 
 class Main
 {

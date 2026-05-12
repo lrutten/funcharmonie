@@ -258,16 +258,22 @@ class Toonaard;
 class Trap
 {
 private:
-   std::string naam; // I, II, III, IV, V, VI, VII
-   int         stap; // trap 0 - 6
+   std::string naam; // I   II    III  IV  V   VI    VII
+                     //  IIb  IIIb       Vb VIb  VIIb
+   int         stap; // trap 0 - 11
    Toonaard   *toonaard;
    NootNaam   *noot;
+   bool        diatonic;
    std::vector<Akkoord *> akkoorden;
 
 public:
-   Trap(std::string nm, int stp, Toonaard *tona, NootNaam *nt);
+   Trap(std::string nm, int stp, Toonaard *tona, NootNaam *nt, bool diat = true);
    ~Trap();
    std::string get_naam();
+   bool is_diatonic()
+   {
+      return diatonic;
+   }
    int get_stap();
    Toonaard *get_toonaard()
    {
@@ -297,9 +303,10 @@ public:
    Toonladder();
    ~Toonladder();
    Trap *get(int i);
+   int diat_plus(int s1, int s2);
    void add_trap(Trap *tr);
    void maak_akkoorden();
-   static const bool lang = false;
+   static const bool lang = true;
    Trap *zoek_noot(std::string nt);
    Trap *zoek_functie(std::string fu);
    Trap *zoek_trap(NootNaam *nn);
@@ -322,7 +329,8 @@ public:
    ~Toonaard();
    std::string get_naam();
    NootNaam *get(int k);
-   int inc(int j);
+   int inc_not_in_use(int j);
+   int diat_plus(int s1, int s2);
    void maak_trappen(Toetsen *tt);
    Trap *zoek_noot(std::string nt);
    Trap *zoek_functie(std::string fu);
