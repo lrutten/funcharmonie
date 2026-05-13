@@ -666,6 +666,16 @@ int Trap::get_stap()
    return stap;
 }
 
+int Trap::get_diatonic_step()
+{
+   return diat_step;
+}
+
+void Trap::set_diatonic_step(int st)
+{
+   diat_step = st;
+}
+
 std::string Trap::get_naam()
 {
    return naam;
@@ -832,6 +842,22 @@ void Toonladder::add_trap(Trap *tr)
    trappen.push_back(tr);
 }
    
+/*
+ * Set the diatonic number in each step.
+ * The range is 0 - 6.
+ */ 
+void Toonladder::set_diat_steps()
+{
+   int diat_step = 0;
+   for (Trap *tr: trappen)
+   {
+      if (tr->is_diatonic())
+      {
+         tr->set_diatonic_step(diat_step++);
+      }
+   }
+}
+
 void Toonladder::maak_akkoorden()
 {
    for (Trap *tr: trappen)
@@ -1111,6 +1137,7 @@ void Toonaard::maak_trappen(Toetsen *tt)
       
       delete wzr;
    }
+   toonladder->set_diat_steps();
    toonladder->maak_akkoorden();
 }
 

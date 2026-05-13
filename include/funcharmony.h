@@ -258,9 +258,10 @@ class Toonaard;
 class Trap
 {
 private:
-   std::string naam; // I   II    III  IV  V   VI    VII
-                     //  IIb  IIIb       Vb VIb  VIIb
-   int         stap; // trap 0 - 11
+   std::string naam;      // I   II    III  IV  V   VI    VII
+                          //  IIb  IIIb       Vb VIb  VIIb
+   int         stap;      // trap 0 - 11
+   int         diat_step; // diatonische trap 0 - 6
    Toonaard   *toonaard;
    NootNaam   *noot;
    bool        diatonic;
@@ -275,6 +276,8 @@ public:
       return diatonic;
    }
    int get_stap();
+   int get_diatonic_step();
+   void set_diatonic_step(int st);
    Toonaard *get_toonaard()
    {
       return toonaard;
@@ -305,6 +308,7 @@ public:
    Trap *get(int i);
    int diat_plus(int s1, int s2);
    void add_trap(Trap *tr);
+   void set_diat_steps();
    void maak_akkoorden();
    static const bool lang = true;
    Trap *zoek_noot(std::string nt);
