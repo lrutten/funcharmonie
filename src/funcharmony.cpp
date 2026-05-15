@@ -70,6 +70,23 @@ int NootNaam::get_midi()
    return midi;
 }
 
+Toets *NootNaam::get_toets()
+{
+   return toets;
+}
+
+void NootNaam::set_toets(Toets *t)
+{
+   toets = t;
+}
+
+bool NootNaam::equals_enharmonic(std::string nt)
+{
+   //return toets->equals_enharmonic(nt);
+   std::cout << "Nootnaam::equals_enharmonic " << nt << "\n";
+   return toets->heeft_naam(nt);
+}
+
 void NootNaam::print()
 {
    std::cout << naam << "\n";
@@ -104,6 +121,7 @@ Wit::~Wit()
 
 bool Wit::heeft_naam(std::string nm)
 {
+   std::cout << "Wit::heeft_naam " << nm << "\n";
    return nm == nootnaam->get_naam();
 }
 
@@ -121,6 +139,11 @@ void Wit::print()
 {
    std::cout << "Wit\n";
    nootnaam->print();
+}
+
+bool Wit::equals_enharmonic(std::string nt)
+{
+   return heeft_naam(nt);
 }
 
 
@@ -149,6 +172,7 @@ NootNaam *Zwart::hoog()
 
 bool Zwart::heeft_naam(std::string nm)
 {
+   std::cout << "Zwart::heeft_naam " << nm << "\n";
    if (nm == nootnaam_laag->get_naam())
    {
       return true;
@@ -195,6 +219,10 @@ void Zwart::print()
    nootnaam_hoog->print();
 }
 
+bool Zwart::equals_enharmonic(std::string nt)
+{
+   return heeft_naam(nt);
+}
 
 // ---------- ToetsWijzer ----------
 
@@ -232,6 +260,7 @@ void ToetsWijzer::inc()
  */ 
 Toetsen::Toetsen()
 {
+   /*
    toetsen.push_back(new Wit(new NootNaam("c", 48)));
    toetsen.push_back(new Zwart(new NootNaam("des", 49), new NootNaam("cis", 49)));
    toetsen.push_back(new Wit(new NootNaam("d", 50)));
@@ -244,6 +273,73 @@ Toetsen::Toetsen()
    toetsen.push_back(new Wit(new NootNaam("a", 57)));
    toetsen.push_back(new Zwart(new NootNaam("bes", 58), new NootNaam("ais", 58)));
    toetsen.push_back(new Wit(new NootNaam("b", 59)));
+    */
+
+   NootNaam *nn_c   = new NootNaam("c", 48);
+   NootNaam *nn_des = new NootNaam("des", 49);
+   NootNaam *nn_cis = new NootNaam("cis", 49);
+   NootNaam *nn_d   = new NootNaam("d", 50);
+   NootNaam *nn_es  = new NootNaam("es", 51);
+   NootNaam *nn_dis = new NootNaam("dis", 51);
+   NootNaam *nn_e   = new NootNaam("e", 52);
+   NootNaam *nn_f   = new NootNaam("f", 53);
+   NootNaam *nn_ges = new NootNaam("ges", 54);
+   NootNaam *nn_fis = new NootNaam("fis", 54);
+   NootNaam *nn_g   = new NootNaam("g", 55);
+   NootNaam *nn_as  = new NootNaam("as", 56);
+   NootNaam *nn_gis = new NootNaam("gis", 56);
+   NootNaam *nn_a   = new NootNaam("a", 57);
+   NootNaam *nn_bes = new NootNaam("bes", 58);
+   NootNaam *nn_ais = new NootNaam("ais", 58);
+   NootNaam *nn_b   = new NootNaam("b", 59);
+
+   /*
+    * Een witte toets heeft één nootnaam.
+    * Een zwarte toets heeft er twee.
+    * Een nootnaam heeft een verwijzing naar de bijbehorende toets.
+    */ 
+   Wit   *k1  = new Wit(nn_c);
+   nn_c->set_toets(k1);
+   Zwart *k2  = new Zwart(nn_des, nn_cis);
+   nn_des->set_toets(k2);
+   nn_cis->set_toets(k2);
+   Wit   *k3  = new Wit(nn_d);
+   nn_d->set_toets(k3);
+   Zwart *k4  = new Zwart(nn_es, nn_dis);
+   nn_es->set_toets(k4);
+   nn_dis->set_toets(k4);
+   Wit   *k5  = new Wit(nn_e);
+   nn_e->set_toets(k5);
+   Wit   *k6  = new Wit(nn_f);
+   nn_f->set_toets(k6);
+   Zwart *k7  = new Zwart(nn_ges, nn_fis);
+   nn_ges->set_toets(k7);
+   nn_fis->set_toets(k7);
+   Wit   *k8  = new Wit(nn_g);
+   nn_g->set_toets(k8);
+   Zwart *k9  = new Zwart(nn_as, nn_gis);
+   nn_as->set_toets(k9);
+   nn_gis->set_toets(k9);
+   Wit   *k10 = new Wit(nn_a);
+   nn_a->set_toets(k10);
+   Zwart *k11 = new Zwart(nn_bes, nn_ais);
+   nn_bes->set_toets(k11);
+   nn_ais->set_toets(k11);
+   Wit   *k12 = new Wit(nn_b);
+   nn_b->set_toets(k12);
+   
+   toetsen.push_back(k1);
+   toetsen.push_back(k2);
+   toetsen.push_back(k3);
+   toetsen.push_back(k4);
+   toetsen.push_back(k5);
+   toetsen.push_back(k6);
+   toetsen.push_back(k7);
+   toetsen.push_back(k8);
+   toetsen.push_back(k9);
+   toetsen.push_back(k10);
+   toetsen.push_back(k11);
+   toetsen.push_back(k12);
 }
 
 Toetsen::~Toetsen()
@@ -868,14 +964,25 @@ void Toonladder::maak_akkoorden()
 
 Trap *Toonladder::zoek_noot(std::string nt)
 {
+   std::cout << "Toonladder::zoek_noot " << nt << "\n";
    for (Trap *trp: trappen)
    {
       NootNaam *nnm = trp->get_noot();
-      if (nt == nnm->get_naam())
+      std::cout << "   nnm " << nnm->get_naam() << "\n";
+      
+      // test for diatonic scales
+      //if (nt == nnm->get_naam())
+      
+      // test for harmonic scales
+      if (nnm->equals_enharmonic(nt))
       {
+         std::cout << "   gevonden\n";
+         //trp->print();
+         //print();
          return trp;
       }
    }
+   std::cout << "   niet gevonden\n";
    return nullptr;
 }
 

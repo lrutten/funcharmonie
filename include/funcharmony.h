@@ -37,18 +37,23 @@ public:
 
 // ---------- NootNaam ----------
 class Noot;
+class Toets;
 
 class NootNaam
 {
 private:
    std::string naam;
    int         midi; // midi nummer binnen het niet-gestreepte octaaf
+   Toets      *toets;
 
 public:
    NootNaam(const std::string &nm, int mnr);
    ~NootNaam();
    std::string get_naam();
    int get_midi();
+   Toets *get_toets();
+   void set_toets(Toets *t);
+   bool equals_enharmonic(std::string nt);
    void print();
 };
 
@@ -74,6 +79,7 @@ public:
    virtual bool heeft_naam(std::string nm) = 0;
    virtual NootNaam *get(int ri) = 0;            // geef NootNaam terug met juiste richting
    virtual NootNaam *get_nn(std::string nm) = 0; // geef NootNaam terug op naam
+   virtual bool equals_enharmonic(std::string nt) = 0; // test of naam in de toets voorkomt
 };
 
 // ---------- Wit ----------
@@ -90,6 +96,7 @@ public:
    virtual NootNaam *get(int ri);
    virtual NootNaam *get_nn(std::string nm);
    virtual void print();
+   virtual bool equals_enharmonic(std::string nt);
 };
 
 // ---------- Zwart ----------
@@ -110,6 +117,7 @@ public:
    virtual NootNaam *get(int ri);
    virtual NootNaam *get_nn(std::string nm);
    virtual void print();
+   virtual bool equals_enharmonic(std::string nt);
 };
 
 // ---------- ToetsWijzer ----------
