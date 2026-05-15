@@ -18,7 +18,8 @@ static const bool debug = false;
 std::map<std::string, std::set<std::string>>functies
 {
    // van    naar
-   { "I",   { "V", "IV", "VI", "III", "VII" } },
+   { "I",   { "V", "IV", "IIb", "VI", "III", "VII" } },
+   { "IIb", { "I" } },
    { "II",  { "V", "VII" } },
    { "III", { "IV", "VI" } },
    { "IV",  { "V", "I" , "II", "VII"} },
@@ -141,12 +142,6 @@ void Wit::print()
    nootnaam->print();
 }
 
-bool Wit::equals_enharmonic(std::string nt)
-{
-   return heeft_naam(nt);
-}
-
-
 // ---------- Zwart ----------
 
 Zwart::Zwart(NootNaam *nn_lg, NootNaam *nn_hg) : nootnaam_laag(nn_lg), nootnaam_hoog(nn_hg)
@@ -219,10 +214,6 @@ void Zwart::print()
    nootnaam_hoog->print();
 }
 
-bool Zwart::equals_enharmonic(std::string nt)
-{
-   return heeft_naam(nt);
-}
 
 // ---------- ToetsWijzer ----------
 

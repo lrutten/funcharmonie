@@ -79,7 +79,6 @@ public:
    virtual bool heeft_naam(std::string nm) = 0;
    virtual NootNaam *get(int ri) = 0;            // geef NootNaam terug met juiste richting
    virtual NootNaam *get_nn(std::string nm) = 0; // geef NootNaam terug op naam
-   virtual bool equals_enharmonic(std::string nt) = 0; // test of naam in de toets voorkomt
 };
 
 // ---------- Wit ----------
@@ -96,7 +95,6 @@ public:
    virtual NootNaam *get(int ri);
    virtual NootNaam *get_nn(std::string nm);
    virtual void print();
-   virtual bool equals_enharmonic(std::string nt);
 };
 
 // ---------- Zwart ----------
@@ -117,7 +115,6 @@ public:
    virtual NootNaam *get(int ri);
    virtual NootNaam *get_nn(std::string nm);
    virtual void print();
-   virtual bool equals_enharmonic(std::string nt);
 };
 
 // ---------- ToetsWijzer ----------
