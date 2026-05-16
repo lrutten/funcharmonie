@@ -95,10 +95,9 @@ analysis = \lyricmode
             \mergeDifferentlyDottedOn\mergeDifferentlyHeadedOn
             \context Voice = "VoiceThree" {  \voiceOne \VoiceThree }
             \context Voice = "VoiceFour"  {  \voiceTwo \VoiceFour }
-            \context Lyrics \lyricsto "VoiceFour" { \analysis  }
+            \context Lyrics \lyricsto "VoiceOne" { \analysis  }
          >>
       >>
-        
    >>
    \layout {}
    % To create MIDI output, uncomment the following line:
