@@ -1083,6 +1083,7 @@ nlohmann::json Lied::to_json()
       }
       else
       {
+         //std::cout << "mnr true\n";
          mnr = true;
       }
    }

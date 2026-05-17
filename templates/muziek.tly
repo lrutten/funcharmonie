@@ -20,7 +20,7 @@
 
 global =
 {
-   \time {{ lied.header.metrum }} \key {{ lied.header.toonaard }} {% if lied.header.minor %} \minor {% else %} \major {% endif %}
+   \time {{ lied.header.metrum }} \key {{ lied.header.toonaard }} {% if lied.header.minor %}\minor{% else %}\major{% endif %}
 }
 
 VoiceOne =
