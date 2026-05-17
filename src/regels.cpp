@@ -199,7 +199,7 @@ void Lied::maak_stemmen()
             bool in_akk = akk->bevat(n_sop->get_trap()->get_noot());
             if (in_akk)
             {
-               // Se sopraannoot komt voor in het akkoord.
+               // De sopraannoot komt voor in het akkoord.
                std::cout << "         in_akk\n";
 
                // Wijs de noot van de sopraan aan.
@@ -215,6 +215,7 @@ void Lied::maak_stemmen()
                            trap->get_naam() == "V"))
                {
                   // Hier mag de terts niet verdubbeld worden.
+                  std::cout << "         sixt basistrap\n";
                   
                   int sop_index = wijzer->geti();
                   constexpr int gr = 0;
@@ -279,6 +280,8 @@ void Lied::maak_stemmen()
                }
                else
                {
+                  std::cout << "         geen sixt basistrap\n";
+
                   // Leg alt en ten vast voor akkoorden in grondligging en 64 akkoorden
                   // Omkering 0 en 1, dus bv I en I64
                   wijzer->dec();
@@ -317,13 +320,19 @@ void Lied::maak_stemmen()
                   nn_bas = akk->get(2); // Neem de kwint van het akkoord
                }
 
-               /* 
-               // toon de noten voordat ze onderalkaar staan
-               std::cout << "            sop " << nn_sop->get_naam() << "\n";
-               std::cout << "            alt " << nn_alt->get_naam() << "\n";
-               std::cout << "            ten " << nn_ten->get_naam() << "\n";
-               std::cout << "            bas " << nn_bas->get_naam() << "\n";
-                */
+                
+               // toon de noten voordat ze onder elkaar staan
+               std::cout << "            sop    " << nn_sop->get_naam() << "\n";
+               std::cout << "            alt    " << nn_alt->get_naam() << "\n";
+               std::cout << "            ten    " << nn_ten->get_naam() << "\n";
+               std::cout << "            bas    " << nn_bas->get_naam() << "\n";
+               
+               // Dit is een test om te zien of het enharmonisch verlagen van de nootnamen werkt.
+               // Zo wordt cis --> des.
+               std::cout << "            sop lw " << nn_sop->force_lower()->get_naam() << "\n";
+               std::cout << "            alt lw " << nn_alt->force_lower()->get_naam() << "\n";
+               std::cout << "            ten lw " << nn_ten->force_lower()->get_naam() << "\n";
+               std::cout << "            bas lw " << nn_bas->force_lower()->get_naam() << "\n";
 
                zet_stemmen_in_tel(t, functie, akk, n_sop, nn_alt, nn_ten, nn_bas);
                

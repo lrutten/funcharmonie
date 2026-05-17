@@ -54,6 +54,8 @@ public:
    Toets *get_toets();
    void set_toets(Toets *t);
    bool equals_enharmonic(std::string nt);
+   NootNaam *force_lower();    // return the lower enharmonic name
+   NootNaam *force_higher();   // return the lower enharmonic name
    void print();
 };
 
@@ -79,6 +81,8 @@ public:
    virtual bool heeft_naam(std::string nm) = 0;
    virtual NootNaam *get(int ri) = 0;            // geef NootNaam terug met juiste richting
    virtual NootNaam *get_nn(std::string nm) = 0; // geef NootNaam terug op naam
+   virtual NootNaam *force_lower() = 0;          // return the lower enharmonic name
+   virtual NootNaam *force_higher() = 0;          // return the lower enharmonic name
 };
 
 // ---------- Wit ----------
@@ -94,6 +98,8 @@ public:
    virtual bool heeft_naam(std::string nm);
    virtual NootNaam *get(int ri);
    virtual NootNaam *get_nn(std::string nm);
+   virtual NootNaam *force_lower();        // return the lower enharmonic name
+   virtual NootNaam *force_higher();       // return the lower enharmonic name
    virtual void print();
 };
 
@@ -114,6 +120,8 @@ public:
    virtual bool heeft_naam(std::string nm);
    virtual NootNaam *get(int ri);
    virtual NootNaam *get_nn(std::string nm);
+   virtual NootNaam *force_lower();        // return the lower enharmonic name
+   virtual NootNaam *force_higher();       // return the lower enharmonic name
    virtual void print();
 };
 

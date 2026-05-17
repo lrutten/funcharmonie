@@ -88,6 +88,16 @@ bool NootNaam::equals_enharmonic(std::string nt)
    return toets->heeft_naam(nt);
 }
 
+NootNaam *NootNaam::force_lower()
+{
+   return toets->force_lower();
+}
+
+NootNaam *NootNaam::force_higher()
+{
+   return toets->force_higher();
+}
+
 void NootNaam::print()
 {
    std::cout << naam << "\n";
@@ -136,6 +146,16 @@ NootNaam *Wit::get_nn(std::string nn)
    return nootnaam;
 }
 
+NootNaam *Wit::force_lower()
+{
+   return nootnaam;
+}
+
+NootNaam *Wit::force_higher()
+{
+   return nootnaam;
+}
+
 void Wit::print()
 {
    std::cout << "Wit\n";
@@ -144,6 +164,7 @@ void Wit::print()
 
 // ---------- Zwart ----------
 
+//                      des              cis
 Zwart::Zwart(NootNaam *nn_lg, NootNaam *nn_hg) : nootnaam_laag(nn_lg), nootnaam_hoog(nn_hg)
 {
 }
@@ -205,6 +226,16 @@ NootNaam *Zwart::get_nn(std::string nm)
    {
       return nootnaam_laag;
    }
+}
+
+NootNaam *Zwart::force_lower()
+{
+   return laag();
+}
+
+NootNaam *Zwart::force_higher()
+{
+   return hoog();
 }
 
 void Zwart::print()
