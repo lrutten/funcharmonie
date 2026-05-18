@@ -55,7 +55,10 @@ public:
    void set_toets(Toets *t);
    bool equals_enharmonic(std::string nt);
    NootNaam *force_lower();    // return the lower enharmonic name
-   NootNaam *force_higher();   // return the lower enharmonic name
+   NootNaam *force_higher();   // return the higher enharmonic name
+   bool is_laag();
+   bool is_hoog();
+   NootNaam *zoek_nootnaam_op_tekst(std::string letters);
    void print();
 };
 
@@ -83,6 +86,9 @@ public:
    virtual NootNaam *get_nn(std::string nm) = 0; // geef NootNaam terug op naam
    virtual NootNaam *force_lower() = 0;          // return the lower enharmonic name
    virtual NootNaam *force_higher() = 0;          // return the lower enharmonic name
+   virtual bool      is_laag(NootNaam *nn) = 0;
+   virtual bool      is_hoog(NootNaam *nn) = 0;
+   virtual NootNaam *zoek_nootnaam_op_tekst(std::string letters) = 0; // zoek nootnaam op letters
 };
 
 // ---------- Wit ----------
@@ -95,12 +101,15 @@ private:
 public:
    Wit(NootNaam *nn);
    virtual ~Wit();
-   virtual bool heeft_naam(std::string nm);
-   virtual NootNaam *get(int ri);
-   virtual NootNaam *get_nn(std::string nm);
-   virtual NootNaam *force_lower();        // return the lower enharmonic name
-   virtual NootNaam *force_higher();       // return the lower enharmonic name
-   virtual void print();
+   virtual bool heeft_naam(std::string nm) override;
+   virtual NootNaam *get(int ri) override;
+   virtual NootNaam *get_nn(std::string nm) override;
+   virtual NootNaam *force_lower() override;        // return the lower enharmonic name
+   virtual NootNaam *force_higher() override;       // return the lower enharmonic name
+   virtual bool      is_laag(NootNaam *nn) override;
+   virtual bool      is_hoog(NootNaam *nn) override;
+   virtual NootNaam *zoek_nootnaam_op_tekst(std::string letters) override; // zoek nootnaam op letters
+   virtual void print() override;
 };
 
 // ---------- Zwart ----------
@@ -117,12 +126,15 @@ public:
    NootNaam *laag();
    NootNaam *hoog();
 
-   virtual bool heeft_naam(std::string nm);
-   virtual NootNaam *get(int ri);
-   virtual NootNaam *get_nn(std::string nm);
-   virtual NootNaam *force_lower();        // return the lower enharmonic name
-   virtual NootNaam *force_higher();       // return the lower enharmonic name
-   virtual void print();
+   virtual bool heeft_naam(std::string nm) override;
+   virtual NootNaam *get(int ri) override;
+   virtual NootNaam *get_nn(std::string nm) override;
+   virtual NootNaam *force_lower() override;        // return the lower enharmonic name
+   virtual NootNaam *force_higher() override;       // return the lower enharmonic name
+   virtual bool      is_laag(NootNaam *nn) override;
+   virtual bool      is_hoog(NootNaam *nn) override;
+   virtual NootNaam *zoek_nootnaam_op_tekst(std::string letters) override; // zoek nootnaam op letters
+   virtual void print() override;
 };
 
 // ---------- ToetsWijzer ----------
@@ -303,6 +315,7 @@ public:
    void add_akkoord(Akkoord *akk);
    void maak_akkoorden();
    Akkoord *zoek_akkoord(int omk);
+   NootNaam *zoek_nootnaam_op_tekst(std::string letters);
    void iterate(auto fu);
    void print();
 };
@@ -438,10 +451,11 @@ public:
 class Noot : public ANoot
 {
 private:
-   Trap       *trap; // weak ptr
-   int         octaaf; // 1: ' 2: '' -1:,
+   Trap       *trap;     // weak ptr
+   int         octaaf;   // 1: ' 2: '' -1:,
    std::string gelezen_tekst; // wordt gebruikt als trap null is
-   int         midi;  // werkelijke toonhoogte
+   int         midi;     // werkelijke toonhoogte
+   NootNaam   *nootnaam; // shortcut naar de gebruikte nootnaam van de trap
 
 public:
    Noot(Trap *trp, int oct, int len, std::string tkst);
@@ -466,6 +480,24 @@ public:
    void set_midi(int mdi)
    {
       midi = mdi;
+   }
+   NootNaam *get_nootnaam()
+   {
+      return nootnaam;
+   }
+
+   bool is_laag()
+   {
+      return nootnaam->is_laag();
+   }
+   bool is_hoog()
+   {
+      return nootnaam->is_hoog();
+   }
+   
+   void set_nootnaam(NootNaam *nn)
+   {
+      nootnaam = nn;
    }
    void onder(Noot *nt);
    bool operator<(Noot &);

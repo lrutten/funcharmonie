@@ -333,6 +333,20 @@ void Lied::maak_stemmen()
                std::cout << "            alt lw " << nn_alt->force_lower()->get_naam() << "\n";
                std::cout << "            ten lw " << nn_ten->force_lower()->get_naam() << "\n";
                std::cout << "            bas lw " << nn_bas->force_lower()->get_naam() << "\n";
+               
+               if (n_sop->is_laag())
+               {
+                  std::cout << "            sop is laag\n";
+               }
+               else
+               if (n_sop->is_hoog())
+               {
+                  std::cout << "            sop is hoog\n";
+               }
+               else
+               {
+                  std::cout << "            sop is laag noch hoog\n";
+               }
 
                zet_stemmen_in_tel(t, functie, akk, n_sop, nn_alt, nn_ten, nn_bas);
                

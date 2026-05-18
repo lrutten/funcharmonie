@@ -98,6 +98,21 @@ NootNaam *NootNaam::force_higher()
    return toets->force_higher();
 }
 
+bool NootNaam::is_laag()
+{
+   return toets->is_laag(this);
+}
+
+bool NootNaam::is_hoog()
+{
+   return toets->is_hoog(this);
+}
+
+NootNaam *NootNaam::zoek_nootnaam_op_tekst(std::string letters)
+{
+   return toets->zoek_nootnaam_op_tekst(letters);
+}
+
 void NootNaam::print()
 {
    std::cout << naam << "\n";
@@ -153,6 +168,22 @@ NootNaam *Wit::force_lower()
 
 NootNaam *Wit::force_higher()
 {
+   return nootnaam;
+}
+
+bool Wit::is_laag(NootNaam *nn)
+{
+   return false;
+}
+
+bool Wit::is_hoog(NootNaam *nn)
+{
+   return false;
+}
+
+NootNaam *Wit::zoek_nootnaam_op_tekst(std::string letters)
+{
+   // geen test nodig
    return nootnaam;
 }
 
@@ -236,6 +267,30 @@ NootNaam *Zwart::force_lower()
 NootNaam *Zwart::force_higher()
 {
    return hoog();
+}
+
+bool Zwart::is_laag(NootNaam *nn)
+{
+   return nn == nootnaam_laag;
+}
+
+bool Zwart::is_hoog(NootNaam *nn)
+{
+   return nn == nootnaam_hoog;
+}
+
+// Geef één van beide nootnamen terug.
+NootNaam *Zwart::zoek_nootnaam_op_tekst(std::string letters)
+{
+   // wel test nodig
+   if (letters == nootnaam_laag->get_naam())
+   {
+      return nootnaam_laag;
+   }
+   else
+   {
+      return nootnaam_hoog;
+   }
 }
 
 void Zwart::print()
@@ -879,6 +934,11 @@ Akkoord *Trap::zoek_akkoord(int omker)
       }
    }
    return nullptr;
+}
+
+NootNaam *Trap::zoek_nootnaam_op_tekst(std::string letters)
+{
+   return noot->zoek_nootnaam_op_tekst(letters);
 }
 
 void Trap::iterate(auto fu)

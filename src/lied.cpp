@@ -804,6 +804,14 @@ void Lied::parse_v1(const std::string line, bool maak_noot)
             add_fout(new Fout(tl->get_nr(), "Noot niet in toonladder"));
             fout = false;
          }
+         
+         // Zoek de gebruikte nootnaam in de trap, es of is.
+         // Een trap die naar een zwarte toets wijst, heeft 2 notennamen.
+         // Deze zoek bewerking geeft één van beide terug, es of is.
+         NootNaam *nn = trap->zoek_nootnaam_op_tekst(letters);
+         assert(nn != nullptr);
+         // Hou de naam bij.
+         noot->set_nootnaam(nn);
       }
       else
       {
