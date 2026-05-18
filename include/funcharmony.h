@@ -54,6 +54,7 @@ public:
    Toets *get_toets();
    void set_toets(Toets *t);
    bool equals_enharmonic(std::string nt);
+   bool equals_enharmonic(NootNaam *nn);
    NootNaam *force_lower();    // return the lower enharmonic name
    NootNaam *force_higher();   // return the higher enharmonic name
    bool is_laag();
@@ -458,7 +459,7 @@ private:
    NootNaam   *nootnaam; // shortcut naar de gebruikte nootnaam van de trap
 
 public:
-   Noot(Trap *trp, int oct, int len, std::string tkst);
+   Noot(Trap *trp, int oct, int len, std::string tkst, NootNaam *nn);
    ~Noot();
    bool is_rust();
    Trap *get_trap()

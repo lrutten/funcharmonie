@@ -24,10 +24,14 @@ void Lied::vul_rusten(Tel *t)
  */ 
 void Lied::zet_stemmen_in_tel(Tel *t, Functie *fu, Akkoord *akk, Noot *n_sop, NootNaam *nn_alt, NootNaam *nn_ten, NootNaam *nn_bas)
 {
+   std::cout << "zet_stemmen_in_tel\n";
+   
    // Maak de noten met behulp van de namen
    Noot *n_alt = akk->maak_noot(nn_alt, t->get_lengte());
    Noot *n_ten = akk->maak_noot(nn_ten, t->get_lengte());
    Noot *n_bas = akk->maak_noot(nn_bas, t->get_lengte());
+
+   std::cout << "noten gemaakt\n";
 
    std::cout << "               noot sop " << n_sop->to_s() << "\n";
    std::cout << "               noot alt " << n_alt->to_s() << "\n";
@@ -329,14 +333,19 @@ void Lied::maak_stemmen()
                
                // Dit is een test om te zien of het enharmonisch verlagen van de nootnamen werkt.
                // Zo wordt cis --> des.
+               /*
                std::cout << "            sop lw " << nn_sop->force_lower()->get_naam() << "\n";
                std::cout << "            alt lw " << nn_alt->force_lower()->get_naam() << "\n";
                std::cout << "            ten lw " << nn_ten->force_lower()->get_naam() << "\n";
                std::cout << "            bas lw " << nn_bas->force_lower()->get_naam() << "\n";
-               
+                */
+
                if (n_sop->is_laag())
                {
                   std::cout << "            sop is laag\n";
+                  nn_alt = nn_alt->force_lower();
+                  nn_ten = nn_ten->force_lower();
+                  nn_bas = nn_bas->force_lower();
                }
                else
                if (n_sop->is_hoog())
@@ -347,6 +356,12 @@ void Lied::maak_stemmen()
                {
                   std::cout << "            sop is laag noch hoog\n";
                }
+
+               // toon de verlaagde noten voordat ze onder elkaar staan
+               std::cout << "            sop2    " << nn_sop->get_naam() << "\n";
+               std::cout << "            alt2    " << nn_alt->get_naam() << "\n";
+               std::cout << "            ten2    " << nn_ten->get_naam() << "\n";
+               std::cout << "            bas2    " << nn_bas->get_naam() << "\n";
 
                zet_stemmen_in_tel(t, functie, akk, n_sop, nn_alt, nn_ten, nn_bas);
                

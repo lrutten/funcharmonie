@@ -25,7 +25,7 @@ ANoot::~ANoot()
 
 // ----------  Noot ----------
 
-Noot::Noot(Trap *trp, int oct, int len, std::string tkst) : ANoot(len), trap(trp), octaaf(oct), gelezen_tekst(tkst)
+Noot::Noot(Trap *trp, int oct, int len, std::string tkst, NootNaam *nn) : ANoot(len), trap(trp), octaaf(oct), gelezen_tekst(tkst), nootnaam(nn)
 {
    midi = trp->get_noot()->get_midi();
    if (oct > 0)
@@ -42,6 +42,13 @@ Noot::Noot(Trap *trp, int oct, int len, std::string tkst) : ANoot(len), trap(trp
       {
          midi -= 12;
       }
+   }
+   
+   // if the originating NootNaam *nn is missing,
+   // take the one from the degree.
+   if (nn == nullptr)
+   {
+      nootnaam = trp->get_noot();
    }
 }
 
@@ -100,7 +107,11 @@ std::string Noot::to_s()
       //std::cout << "      trap nullptr\n";
       return gelezen_tekst;
    }
-   std::string nootnm = get_trap()->get_noot()->get_naam();
+   //std::string nootnm = get_trap()->get_noot()->get_naam();
+   
+   // Take the shortcut note name
+   std::string nootnm = nootnaam->get_naam();
+   
    int oct = get_octaaf();
    if (oct > 0)
    {
@@ -794,7 +805,7 @@ void Lied::parse_v1(const std::string line, bool maak_noot)
             std::cout << "noot trap gevonden\n";
          }
 
-         Noot *noot = new Noot(trap, s_to_octaaf(acckomma), s_to_lengte(cijfer), noottekst);
+         Noot *noot = new Noot(trap, s_to_octaaf(acckomma), s_to_lengte(cijfer), noottekst, nullptr);
          Tel  *tl = get_tel(i);
          tl->set_stem(0, noot);
          tl->set_lengte(s_to_lengte(cijfer));  // de tel krijgt de lengte van de v1 noot

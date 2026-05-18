@@ -88,6 +88,13 @@ bool NootNaam::equals_enharmonic(std::string nt)
    return toets->heeft_naam(nt);
 }
 
+bool NootNaam::equals_enharmonic(NootNaam *nn)
+{
+   //return toets->equals_enharmonic(nt);
+   //std::cout << "Nootnaam::equals_enharmonic " << nt << "\n";
+   return equals_enharmonic(nn->get_naam());
+}
+
 NootNaam *NootNaam::force_lower()
 {
    return toets->force_lower();
@@ -584,8 +591,8 @@ void StemBereiken::maak_bereiken(Harmonie *harmonie)
       }
       
       // Maak 2 noten zonder lengte noch tekst
-      Noot *nt_lg = new Noot(tr_lg, oct_lg, 0, gelezen_lg);
-      Noot *nt_hg = new Noot(tr_hg, oct_hg, 0, gelezen_hg);
+      Noot *nt_lg = new Noot(tr_lg, oct_lg, 0, gelezen_lg, nullptr);
+      Noot *nt_hg = new Noot(tr_hg, oct_hg, 0, gelezen_hg, nullptr);
       nt_lg->print();
       nt_hg->print();
       
@@ -761,7 +768,10 @@ Noot *Akkoord::maak_noot(NootNaam *nn, int len)
    //Noot(Trap *trp, int oct, int len, std::string tkst);
    Toonaard *toonaard = trap->get_toonaard();
    Trap *trp = toonaard->zoek_trap(nn);
-   Noot *nt = new Noot(trp, 0, len, "");
+
+   assert(trp != nullptr);
+
+   Noot *nt = new Noot(trp, 0, len, "", nn);
    nt->set_midi(nn->get_midi());
    return nt;
 }
@@ -1092,7 +1102,7 @@ Trap *Toonladder::zoek_trap(NootNaam *nn)
 {
    for (Trap *tr: trappen)
    {
-      if (tr->get_noot()  == nn)
+      if (tr->get_noot()->equals_enharmonic(nn))
       {
          return tr;
       }
