@@ -299,6 +299,14 @@ void Lied::maak_stemmen()
                      std::cout << "         geen sixt hoofdtrap\n";
                   }
 
+                  if (trap->is_diatonic() && !trap->is_main())
+                  {
+                     std::cout << "         neventrap\n";
+                     if (functie->get_dominant() == "d")
+                     {
+                     std::cout << "         dominant\n";
+                     }
+                  }
                   // Leg alt en ten vast voor akkoorden in grondligging en 64 akkoorden
                   // Omkering 0 en 1, dus bv I en I64
                   wijzer->dec();

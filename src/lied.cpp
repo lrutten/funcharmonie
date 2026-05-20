@@ -227,8 +227,8 @@ const std::string_view ew_to_s(Ligging ew)
 
 // ----------  Functie ----------
 
-Functie::Functie(Trap *trp, std::string tkst, std::string kwsxt, std::string ew, std::string plmn) : 
-   trap(trp), tekst(tkst), kwartsixt(kwsxt), plusmin(plmn)
+Functie::Functie(Trap *trp, std::string tkst, std::string kwsxt, std::string dom, std::string spt, std::string ew, std::string plmn) : 
+   trap(trp), tekst(tkst), kwartsixt(kwsxt), dominant(dom), septime(spt), plusmin(plmn)
 {
    if (ew == "e")
    {
@@ -864,7 +864,8 @@ void Lied::parse_fu(const std::string line)
 
    // patroon voor de functies I, II, III, IV, V, VI en VII
    // nu ook met 64, 4, e en w
-   const std::regex toonaard(R"((?:^|\s+)((?:IIb|IV|III|II|I|VII|VI|V))((?:64|6)?)((?:e|w|x)?)((?:(?:\+|\-|\=){0,3})))");
+   //const std::regex toonaard(R"((?:^|\s+)((?:IIb|IV|III|II|I|VII|VI|V))((?:64|6)?)       ((?:e|w|x)?)((?:(?:\+|\-|\=){0,3})))");
+   const std::regex toonaard(R"((?:^|\s+)((?:IIb|IV|III|II|I|VII|VI|V))((?:64|6)?)((?:d)?)((?:s)?)((?:e|w|x|y)?)((?:(?:\+|\-|\=){0,3})))");
             
    // overloop alle toonaarden van een regel, dus multi-match
    unsigned long i = 0;
@@ -876,12 +877,16 @@ void Lied::parse_fu(const std::string line)
                
       // Een toonaard bestaat uit romeinse cijfers
       std::string romcijfer = (*it)[1];
-      std::string kwartsixt = (*it)[2];
-      std::string engwijd   = (*it)[3];
-      std::string plusmin   = (*it)[4];
+      std::string kwartsixt = (*it)[2]; // 64 6
+      std::string dominant  = (*it)[3]; // d
+      std::string septime   = (*it)[4]; // s
+      std::string engwijd   = (*it)[5]; // e w x y
+      std::string plusmin   = (*it)[6]; // + - °
                
       std::cout << "romeins cijfer " <<  romcijfer << "\n";
       std::cout << "kwartsixt      " <<  kwartsixt << "\n";
+      std::cout << "dominant       " <<  dominant  << "\n";
+      std::cout << "septime        " <<  septime   << "\n";
       std::cout << "engwijd        " <<  engwijd   << "\n";
       std::cout << "plusmin        " <<  plusmin   << "\n";
 
@@ -910,7 +915,7 @@ void Lied::parse_fu(const std::string line)
       std::cout << "   functie trap gevonden\n";
       
 
-      Functie *fun = new Functie(trap, romcijfer, kwartsixt, engwijd, plusmin);
+      Functie *fun = new Functie(trap, romcijfer, kwartsixt, dominant, septime, engwijd, plusmin);
       tel->set_functie(fun);
       
       i++;

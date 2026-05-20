@@ -544,17 +544,27 @@ private:
    Trap       *trap; // weak ptr
    std::string tekst;
    std::string kwartsixt;
+   std::string dominant;
+   std::string septime;
    Ligging     engwijd;
    std::string plusmin;
    
 public:
-   Functie(Trap *trp, std::string tkst, std::string kwsxt, std::string ew, std::string plmn);   
+   Functie(Trap *trp, std::string tkst, std::string kwsxt, std::string dom, std::string spt, std::string ew, std::string plmn);   
    ~Functie();
    Trap       *get_trap();
    std::string get_tekst();
    std::string get_kwartsixt()
    {
       return kwartsixt;
+   }
+   std::string get_dominant()
+   {
+      return dominant;
+   }
+   std::string get_septime()
+   {
+      return septime;
    }
    Ligging get_engwijd()
    {
