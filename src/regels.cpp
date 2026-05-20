@@ -212,14 +212,18 @@ void Lied::maak_stemmen()
                NootNaam *nn_alt = nullptr;
                NootNaam *nn_ten = nullptr;
 
-               // Is dit een sixt akkoord van de basistrappen I IV V?               
-               if (functie->get_kwartsixt() == "6" && 
+               /*
+                  oude test
                           (trap->get_naam() == "I"  ||
                            trap->get_naam() == "IV" ||
                            trap->get_naam() == "V"))
+                */
+               
+               // Is dit een sixt akkoord van de hoofdtrappen I IV V?               
+               if (functie->get_kwartsixt() == "6" && trap->is_main())
                {
                   // Hier mag de terts niet verdubbeld worden.
-                  std::cout << "         sixt basistrap\n";
+                  std::cout << "         sixt hoofdtrap\n";
                   
                   int sop_index = wijzer->geti();
                   constexpr int gr = 0;
@@ -284,7 +288,16 @@ void Lied::maak_stemmen()
                }
                else
                {
-                  std::cout << "         geen sixt basistrap\n";
+                  // Hier hebben we een akkoord in de grondligging of kwartsix op elke
+                  // trap, ook trap IIb, of een sixt akkoord op de neventrappen of IIb.
+                  if (trap->get_naam() == "IIb")
+                  {
+                     std::cout << "         napolitaans sixt\n";
+                  }
+                  else
+                  {
+                     std::cout << "         geen sixt hoofdtrap\n";
+                  }
 
                   // Leg alt en ten vast voor akkoorden in grondligging en 64 akkoorden
                   // Omkering 0 en 1, dus bv I en I64
@@ -340,9 +353,9 @@ void Lied::maak_stemmen()
                std::cout << "            bas lw " << nn_bas->force_lower()->get_naam() << "\n";
                 */
 
-               if (n_sop->is_laag())
+               if (n_sop->is_laag() && trap->get_naam() == "IIb")
                {
-                  std::cout << "            sop is laag\n";
+                  std::cout << "            sop is laag in trap IIb\n";
                   nn_alt = nn_alt->force_lower();
                   nn_ten = nn_ten->force_lower();
                   nn_bas = nn_bas->force_lower();

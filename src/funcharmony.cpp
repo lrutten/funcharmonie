@@ -84,7 +84,7 @@ void NootNaam::set_toets(Toets *t)
 bool NootNaam::equals_enharmonic(std::string nt)
 {
    //return toets->equals_enharmonic(nt);
-   std::cout << "Nootnaam::equals_enharmonic " << nt << "\n";
+   //std::cout << "Nootnaam::equals_enharmonic " << nt << "\n";
    return toets->heeft_naam(nt);
 }
 
@@ -154,7 +154,7 @@ Wit::~Wit()
 
 bool Wit::heeft_naam(std::string nm)
 {
-   std::cout << "Wit::heeft_naam " << nm << "\n";
+   //std::cout << "Wit::heeft_naam " << nm << "\n";
    return nm == nootnaam->get_naam();
 }
 
@@ -226,7 +226,7 @@ NootNaam *Zwart::hoog()
 
 bool Zwart::heeft_naam(std::string nm)
 {
-   std::cout << "Zwart::heeft_naam " << nm << "\n";
+   //std::cout << "Zwart::heeft_naam " << nm << "\n";
    if (nm == nootnaam_laag->get_naam())
    {
       return true;
