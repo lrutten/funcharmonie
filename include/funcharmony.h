@@ -290,17 +290,20 @@ private:
    int         diat_step; // diatonische trap 0 - 6
    Toonaard   *toonaard;
    NootNaam   *noot;
-   bool        diatonic;
+   bool        diatonic;  // is not chromatic
+   bool        main;      // is main degree I IV of V
    std::vector<Akkoord *> akkoorden;
 
 public:
-   Trap(std::string nm, int stp, Toonaard *tona, NootNaam *nt, bool diat = true);
+   Trap(std::string nm, int stp, Toonaard *tona, NootNaam *nt, bool diat = true, bool mn = false);
    ~Trap();
    std::string get_naam();
    bool is_diatonic()
    {
       return diatonic;
    }
+   bool is_main();
+   void set_main(bool mn);
    int get_stap();
    int get_diatonic_step();
    void set_diatonic_step(int st);

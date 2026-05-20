@@ -830,7 +830,7 @@ void Akkoord::print()
 
 // ---------- Trap ----------
 
-Trap::Trap(std::string nm, int stp, Toonaard *tona, NootNaam *nt, bool diat) : noot(nt), naam(nm), stap(stp), toonaard(tona), diatonic(diat) 
+Trap::Trap(std::string nm, int stp, Toonaard *tona, NootNaam *nt, bool diat, bool mn) : naam(nm), stap(stp), toonaard(tona), noot(nt), diatonic(diat), main(mn) 
 {
 }
 
@@ -857,6 +857,16 @@ int Trap::get_diatonic_step()
 void Trap::set_diatonic_step(int st)
 {
    diat_step = st;
+}
+
+bool Trap::is_main()
+{
+   return main;
+}
+
+void Trap::set_main(bool mn)
+{
+   main = mn;
 }
 
 std::string Trap::get_naam()
@@ -1234,7 +1244,7 @@ void Toonaard::maak_trappen(Toetsen *tt)
       int ni = 0;
       NootNaam *nn1 = wzr->get(richting);
       if (debug) std::cout << "      noot 1 diat " << nn1->get_naam() << "\n";
-      toonladder->add_trap(new Trap("I", ni++, this, nn1));
+      toonladder->add_trap(new Trap("I", ni++, this, nn1, true, true));
 
       wzr->inc();
       NootNaam *nn2b = wzr->get(richting);
@@ -1278,7 +1288,7 @@ void Toonaard::maak_trappen(Toetsen *tt)
       }
       NootNaam *nn4 = wzr->get(richting);
       if (debug) std::cout << "      noot 4 diat " << nn4->get_naam() << "\n";
-      toonladder->add_trap(new Trap("IV", ni++, this, nn4));
+      toonladder->add_trap(new Trap("IV", ni++, this, nn4, true, true));
          
       wzr->inc();
       NootNaam *nn5b = wzr->get(richting);
@@ -1288,7 +1298,7 @@ void Toonaard::maak_trappen(Toetsen *tt)
       wzr->inc();
       NootNaam *nn5 = wzr->get(richting);
       if (debug) std::cout << "      noot 5 diat " << nn5->get_naam() << "\n";
-      toonladder->add_trap(new Trap("V", ni++, this, nn5));
+      toonladder->add_trap(new Trap("V", ni++, this, nn5, true, true));
       
       if (minor)
       {
@@ -1312,11 +1322,11 @@ void Toonaard::maak_trappen(Toetsen *tt)
          wzr->inc();
          NootNaam *nn7bb = wzr->get(richting);
          if (debug) std::cout << "      noot 7bb chrom " << nn7bb->get_naam() << "\n";
-         toonladder->add_trap(new Trap("VIIb", ni++, this, nn7bb, false));
+         toonladder->add_trap(new Trap("VIIbb", ni++, this, nn7bb, false));
 
          wzr->inc();
          NootNaam *nn7b = wzr->get(richting);
-         if (debug) std::cout << "      noot 7bb chrom " << nn7b->get_naam() << "\n";
+         if (debug) std::cout << "      noot 7b chrom " << nn7b->get_naam() << "\n";
          toonladder->add_trap(new Trap("VIIb", ni++, this, nn7b, false));
 
          wzr->inc();
